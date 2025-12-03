@@ -4,7 +4,7 @@
 
 ### 1️⃣ АУТЕНТИФИКАЦИЯ УЧАСТНИКА (Telegram)
 
-**Фронт получает `initData` из Telegram Mini App:**
+**Фронт получает `initData` из Telegram Bot:**
 
 ```javascript
 // На фронте (React/Vue/etc)
