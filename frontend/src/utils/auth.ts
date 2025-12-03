@@ -1,0 +1,39 @@
+/**
+ * Утилиты для работы с авторизацией
+ */
+
+export function getCookie(name: string): string | null {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
+  return null;
+}
+
+export function setCookie(name: string, value: string, days: number = 7): void {
+  const maxAge = 60 * 60 * 24 * days;
+  document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=${maxAge}`;
+}
+
+export function deleteCookie(name: string): void {
+  document.cookie = `${name}=; path=/; max-age=0`;
+}
+
+export function isUserAuthenticated(): boolean {
+  return getCookie('access_token') !== null;
+}
+
+export function isAdminAuthenticated(): boolean {
+  return getCookie('admin_token') !== null;
+}
+
+export function logout(): void {
+  deleteCookie('access_token');
+  deleteCookie('user_id');
+  window.location.href = '/auth';
+}
+
+export function adminLogout(): void {
+  deleteCookie('admin_token');
+  window.location.href = '/admin/login';
+}
+

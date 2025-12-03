@@ -1,0 +1,83 @@
+<script setup lang="ts">
+import { ref, defineProps } from 'vue';
+import axios from 'axios';
+
+const props = defineProps<{
+  url: string;
+  filename: string;
+  label: string;
+}>();
+
+const downloading = ref(false);
+
+function getCookie(name: string): string | null {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
+  return null;
+}
+
+async function downloadCsv() {
+  downloading.value = true;
+  try {
+    const token = getCookie('admin_token');
+    if (!token) throw new Error('Нет admin_token');
+    const response = await axios.get(props.url, {
+      responseType: 'blob',
+      headers: { 'Authorization': `Bearer ${token}` },
+    });
+    const href = URL.createObjectURL(response.data);
+    const link = document.createElement('a');
+    link.href = href;
+    link.setAttribute('download', props.filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(href);
+  } catch (e: any) {
+    alert('Ошибка экспорта CSV');
+  } finally {
+    downloading.value = false;
+  }
+}
+</script>
+
+<template>
+  <button @click="downloadCsv" :disabled="downloading" class="csv-btn">
+    <span v-if="!downloading">{{ props.label }}</span>
+    <span v-else class="loader"></span>
+  </button>
+</template>
+
+<style scoped>
+.csv-btn {
+  border: none;
+  padding: 0.5rem 1.1rem;
+  font-size: 1rem;
+  border-radius: 6px;
+  background: #0987c7;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.15s;
+  min-width: 120px;
+  position: relative;
+}
+.csv-btn:disabled {
+  background: #7698a2;
+  cursor: wait;
+}
+.loader {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  border-top-color: #0987c7;
+  animation: spin-csv 0.7s linear infinite;
+  vertical-align: middle;
+}
+@keyframes spin-csv {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+</style>
