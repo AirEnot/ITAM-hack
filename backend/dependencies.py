@@ -2,17 +2,18 @@
 dependencies.py — зависимости для FastAPI (текущий пользователь, права)
 """
 from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthCredentials
+from fastapi.security import HTTPBearer
 from sqlalchemy.orm import Session
 from database import get_db
 from models import User, Admin
 from services.jwt_handler import decode_token
 
+
 security = HTTPBearer()
 
 
 async def get_current_user(
-    credentials: HTTPAuthCredentials = Depends(security),
+    credentials = Depends(security),
     db: Session = Depends(get_db)
 ) -> User:
     """
@@ -41,7 +42,7 @@ async def get_current_user(
 
 
 async def get_current_admin(
-    credentials: HTTPAuthCredentials = Depends(security),
+    credentials = Depends(security),
     db: Session = Depends(get_db)
 ) -> Admin:
     """

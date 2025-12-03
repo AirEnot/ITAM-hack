@@ -4,3 +4,4 @@ Dockerfile
 .env
 !README.md
 !FRONTEND_INTEGRATION.md
+__pycache__
