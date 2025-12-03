@@ -292,64 +292,7 @@ backend/
 
 ## 🐳 Развертывание
 
-### Docker (локально или на сервере)
-
-#### Требования
-
-- Docker
-- Docker Compose
-
-#### Процесс
-
-```bash
-# 1. Настроить .env
-cp .env.example .env
-
-# 2. Собрать и запустить
-docker-compose up -d
-
-# 3. Проверить статус
-docker-compose ps
-
-# 4. Посмотреть логи
-docker-compose logs -f backend
-
-# 5. Остановить
-docker-compose down
-
-# 6. Очистить
-docker-compose down -v  # с удалением volumes
-```
-
-### Продакшн (рекомендации)
-
-- [ ] Использовать **PostgreSQL** вместо SQLite
-- [ ] Включить **HTTPS** (Let's Encrypt)
-- [ ] Настроить **Nginx** как reverse proxy
-- [ ] Использовать **Gunicorn** вместо Uvicorn
-- [ ] Настроить **rate limiting** (slowapi)
-- [ ] Логирование в **ELK Stack** или CloudWatch
-- [ ] Мониторинг **Prometheus + Grafana**
-- [ ] Резервные копии БД
-
-Пример Dockerfile для продакшена:
-
-```dockerfile
-FROM python:3.11-slim as builder
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install --user --no-cache-dir -r requirements.txt
-
-FROM python:3.11-slim
-WORKDIR /app
-COPY --from=builder /root/.local /root/.local
-COPY . .
-
-ENV PATH=/root/.local/bin:$PATH
-
-CMD ["gunicorn", "main:app", "-w", "4", "-k", "uvicorn.workers.UvicornWorker"]
-```
-
+### локально 
 ---
 
 ## 🔌 Интеграция с фронтом
