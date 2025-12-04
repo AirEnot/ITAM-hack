@@ -1,7 +1,7 @@
 """
 routers/auth.py — аутентификация (Telegram + Admin)
 """
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Body
 from sqlalchemy.orm import Session
 from datetime import timedelta
 from database import get_db
@@ -123,11 +123,10 @@ def generate_telegram_code(
         "message": f"Ваш код: {code}\n\nВставьте этот код на сайте чтобы авторизоваться"
     }
 
-
 @router.post("/telegram/verify-code")
 def verify_telegram_code(
-    code: str,
-    db: Session = Depends(get_db)
+    code: str = Body(..., embed=True),
+    db: Session = Depends(get_db),
 ):
     """
     Проверяет код авторизации и возвращает JWT токен

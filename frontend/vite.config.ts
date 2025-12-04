@@ -5,10 +5,10 @@ import vue from '@vitejs/plugin-vue'
 export default defineConfig({
   plugins: [vue()],
   server: {
-    port: 8000,
+    port: 3000,
     open: true,
     // Проксирование API запросов к backend
-    // Backend должен работать на порту 8001 (или другом)
+    // Backend работает на порту 8000 (FastAPI)
     proxy: {
       '/api': {
         target: 'http://localhost:8000',
