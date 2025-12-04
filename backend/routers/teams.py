@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from database import get_db
 from models import Team, TeamMember, User, Invitation, UserHackathon, Hackathon
-from schemas import TeamCreate, TeamResponse, TeamDetailResponse
+from schemas import TeamCreate, TeamResponse, TeamDetailResponse, MyTeamItem
 from dependencies import get_current_user
 
 router = APIRouter(prefix="/api/teams", tags=["teams"])
@@ -80,6 +80,49 @@ async def create_team(
     return TeamResponse.model_validate(team)
 
 
+@router.get("/my", response_model=list[MyTeamItem])
+async def get_my_teams(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Получить список команд, в которых состоит текущий пользователь,
+    вместе с информацией о хакатоне.
+    """
+    # Находим все записи участия пользователя в хакатонах, где задана команда
+    user_hackathons = db.query(UserHackathon).filter(
+        UserHackathon.user_id == current_user.id,
+        UserHackathon.team_id != None
+    ).all()
+
+    if not user_hackathons:
+        return []
+
+    team_ids = {uh.team_id for uh in user_hackathons if uh.team_id is not None}
+
+    if not team_ids:
+        return []
+
+    teams = db.query(Team).join(Hackathon, Team.hackathon_id == Hackathon.id).filter(
+        Team.id.in_(team_ids)
+    ).all()
+
+    result: list[MyTeamItem] = []
+    for team in teams:
+        result.append(
+            MyTeamItem(
+                id=team.id,
+                name=team.name,
+                description=team.description,
+                hackathon_id=team.hackathon_id,
+                hackathon_name=team.hackathon.name if team.hackathon else "",
+                status=team.status,
+            )
+        )
+
+    return result
+
+
 @router.get("/{team_id}", response_model=TeamDetailResponse)
 async def get_team(
     team_id: int,
@@ -88,13 +131,13 @@ async def get_team(
 ):
     """Получить информацию о команде"""
     team = db.query(Team).filter(Team.id == team_id).first()
-    
+
     if not team:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Team not found"
         )
-    
+
     return TeamDetailResponse.model_validate(team)
 
 
@@ -110,7 +153,7 @@ async def list_teams_by_hackathon(
         Team.hackathon_id == hackathon_id,
         Team.status == status_filter
     ).all()
-    
+
     return [TeamResponse.model_validate(t) for t in teams]
 
 

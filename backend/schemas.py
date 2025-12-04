@@ -1,9 +1,10 @@
 """
 schemas.py — Pydantic схемы для Request/Response
 """
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, field_validator
 from datetime import datetime
 from typing import Optional, List
+import json
 
 
 # ==================== AUTH ====================
@@ -44,6 +45,17 @@ class UserProfile(BaseModel):
     avatar_url: Optional[str]
     created_at: datetime
     
+    @field_validator('skills', mode='before')
+    @classmethod
+    def parse_skills(cls, v):
+        """Преобразовать JSON строку в список"""
+        if isinstance(v, str):
+            try:
+                return json.loads(v) if v else []
+            except:
+                return []
+        return v if isinstance(v, list) else []
+    
     class Config:
         from_attributes = True
 
@@ -66,6 +78,17 @@ class UserListItem(BaseModel):
     role_preference: Optional[str]
     experience_level: str
     avatar_url: Optional[str]
+    
+    @field_validator('skills', mode='before')
+    @classmethod
+    def parse_skills(cls, v):
+        """Преобразовать JSON строку в список"""
+        if isinstance(v, str):
+            try:
+                return json.loads(v) if v else []
+            except:
+                return []
+        return v if isinstance(v, list) else []
     
     class Config:
         from_attributes = True
@@ -145,6 +168,16 @@ class TeamResponse(BaseModel):
 class TeamDetailResponse(TeamResponse):
     """Детальная информация о команде с капитаном"""
     captain: UserProfile
+
+
+class MyTeamItem(BaseModel):
+    """Команда текущего пользователя с краткой информацией"""
+    id: int
+    name: str
+    description: Optional[str]
+    hackathon_id: int
+    hackathon_name: str
+    status: str
 
 
 # ==================== INVITATIONS ====================

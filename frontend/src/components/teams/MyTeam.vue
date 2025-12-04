@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
+import axios from 'axios';
 
 const teams = ref<any[]>([]);
 const loading = ref(false);
@@ -18,11 +19,14 @@ async function loadMyTeams() {
   try {
     const token = getCookie('access_token');
     if (!token) throw new Error('Нет токена');
-    // Здесь нужно будет загрузить команды через другой endpoint или через список хакатонов
-    // Для MVP показываем сообщение
-    teams.value = [];
+
+    const response = await axios.get('http://localhost:8000/api/teams/my', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    teams.value = response.data;
   } catch (e: any) {
-    error.value = e?.response?.data?.detail || e?.message || 'Ошибка';
+    error.value = e?.response?.data?.detail || e?.message || 'Ошибка загрузки команд';
   } finally {
     loading.value = false;
   }
@@ -33,7 +37,7 @@ onMounted(loadMyTeams);
 
 <template>
   <div class="my-team">
-    <h1>Моя команда</h1>
+    <h1>Мои команды</h1>
     <div v-if="loading">Загрузка...</div>
     <div v-else-if="error" class="error">{{ error }}</div>
     <div v-else-if="teams.length === 0" class="empty">
@@ -44,7 +48,8 @@ onMounted(loadMyTeams);
       <div v-for="team in teams" :key="team.id" class="team-card">
         <h3>{{ team.name }}</h3>
         <p v-if="team.description">{{ team.description }}</p>
-        <a :href="`/teams/${team.id}`" class="btn-view">Подробнее</a>
+        <p class="hackathon-name">Хакатон: {{ team.hackathon_name }}</p>
+        <router-link :to="`/teams/${team.id}`" class="btn-view">Подробнее</router-link>
       </div>
     </div>
   </div>
@@ -59,6 +64,25 @@ onMounted(loadMyTeams);
   color: #4cc5fc;
   margin-bottom: 2rem;
 }
+.teams-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+.team-card {
+  background: #1e1e2e;
+  border-radius: 12px;
+  padding: 1.5rem;
+  color: #ececec;
+}
+.team-card h3 {
+  margin: 0 0 0.5rem 0;
+}
+.hackathon-name {
+  color: #b8b8d4;
+  font-size: 0.9rem;
+  margin-top: 0.3rem;
+}
 .empty {
   text-align: center;
   padding: 3rem;
@@ -70,6 +94,15 @@ onMounted(loadMyTeams);
   display: inline-block;
   margin-top: 1rem;
   padding: 0.8rem 2rem;
+  background: #0987c7;
+  border-radius: 6px;
+  color: #fff;
+  text-decoration: none;
+}
+.btn-view {
+  display: inline-block;
+  margin-top: 1rem;
+  padding: 0.6rem 1.4rem;
   background: #0987c7;
   color: #fff;
   text-decoration: none;
