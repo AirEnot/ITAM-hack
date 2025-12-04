@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     
     # Admin
     ADMIN_EMAIL: str = "admin@example.com"
-    ADMIN_PASSWORD: str = "password123123"
+    ADMIN_PASSWORD: str = "123123"
     
     # Database
     DATABASE_URL: str = "sqlite:///./database.sqlite"

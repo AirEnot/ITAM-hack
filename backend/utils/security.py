@@ -9,7 +9,8 @@ from config import get_settings
 settings = get_settings()
 
 # Для хеширования паролей админов
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Используем pbkdf2_sha256, чтобы избежать проблем с bcrypt версией и ограничением в 72 байта
+pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 
 
 def hash_password(password: str) -> str:
