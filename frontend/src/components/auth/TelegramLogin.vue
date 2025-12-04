@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { ROUTES, COOKIE_NAMES } from '../../config';
 import apiClient from '../../utils/api';
+import { setCookie } from '../../utils/auth';
 
 const router = useRouter();
 
@@ -14,11 +15,6 @@ const error = ref('');
 // Информация о боте (для ссылки)
 const botLink = ref<string | null>(null);
 const botUsername = ref<string | null>(null);
-
-function setCookie(name: string, value: string, days: number = 7) {
-  const maxAge = 60 * 60 * 24 * days;
-  document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=${maxAge}`;
-}
 
 async function fetchBotLink() {
   try {

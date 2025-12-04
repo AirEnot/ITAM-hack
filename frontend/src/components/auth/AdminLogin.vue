@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { COOKIE_NAMES } from '../../config';
+import { setCookie } from '../../utils/auth';
+import { adminApiClient } from '../../utils/api';
 
 const router = useRouter();
 
@@ -9,28 +12,22 @@ const password = ref('');
 const loading = ref(false);
 const error = ref('');
 
-// setCookie с поддержкой дней (локальный хелпер)
-function setCookie(name: string, value: string, days: number = 1) {
-  const maxAge = 60 * 60 * 24 * days;
-  document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=${maxAge}`;
-}
-
 async function loginAdmin() {
   error.value = '';
   loading.value = true;
   try {
-    const response = await fetch('http://localhost:8000/api/admin/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: email.value, password: password.value })
+    const { data } = await adminApiClient.post('/api/auth/admin/login', {
+      email: email.value,
+      password: password.value,
     });
-    if (!response.ok) throw new Error('Ошибка входа (email/пароль)');
-    const data = await response.json();
-    setCookie('admin_token', data.access_token, 1); // token на 1 день
+
+    // Сохраняем токен админа в cookie
+    setCookie(COOKIE_NAMES.ADMIN_TOKEN, data.access_token, 1);
+
     // Перенаправляем на админ-дашборд
     router.push('/admin');
   } catch (e: any) {
-    error.value = e?.message || 'Ошибка';
+    error.value = e?.response?.data?.detail || e?.message || 'Ошибка входа (email/пароль)';
   } finally {
     loading.value = false;
   }

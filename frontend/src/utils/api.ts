@@ -1,4 +1,5 @@
 import axios, { type AxiosInstance } from 'axios';
+import { COOKIE_NAMES } from '../config';
 
 // Используем относительный путь для работы через Vite proxy
 // В production можно использовать переменную окружения
@@ -23,7 +24,7 @@ function getCookie(name: string): string | null {
 // Interceptor для добавления токена авторизации
 apiClient.interceptors.request.use(
   (config) => {
-    const token = getCookie('access_token');
+    const token = getCookie(COOKIE_NAMES.ACCESS_TOKEN);
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -40,8 +41,8 @@ apiClient.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       // Токен истек или невалиден - очищаем cookies и редиректим на страницу входа
-      document.cookie = 'access_token=; path=/; max-age=0';
-      document.cookie = 'user_id=; path=/; max-age=0';
+      document.cookie = `${COOKIE_NAMES.ACCESS_TOKEN}=; path=/; max-age=0`;
+      document.cookie = `${COOKIE_NAMES.USER_ID}=; path=/; max-age=0`;
       if (window.location.pathname !== '/auth') {
         window.location.href = '/auth';
       }
@@ -60,7 +61,7 @@ const adminApiClient: AxiosInstance = axios.create({
 
 adminApiClient.interceptors.request.use(
   (config) => {
-    const token = getCookie('admin_token');
+    const token = getCookie(COOKIE_NAMES.ADMIN_TOKEN);
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }

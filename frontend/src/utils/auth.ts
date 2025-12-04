@@ -1,6 +1,7 @@
 /**
- * Утилиты для работы с авторизацией
+ * Утилиты для работы с авторизацией и cookie
  */
+import { COOKIE_NAMES } from '../config';
 
 export function getCookie(name: string): string | null {
   const value = `; ${document.cookie}`;
@@ -19,21 +20,21 @@ export function deleteCookie(name: string): void {
 }
 
 export function isUserAuthenticated(): boolean {
-  return getCookie('access_token') !== null;
+  return getCookie(COOKIE_NAMES.ACCESS_TOKEN) !== null;
 }
 
 export function isAdminAuthenticated(): boolean {
-  return getCookie('admin_token') !== null;
+  return getCookie(COOKIE_NAMES.ADMIN_TOKEN) !== null;
 }
 
 export function logout(): void {
-  deleteCookie('access_token');
-  deleteCookie('user_id');
+  deleteCookie(COOKIE_NAMES.ACCESS_TOKEN);
+  deleteCookie(COOKIE_NAMES.USER_ID);
   window.location.href = '/auth';
 }
 
 export function adminLogout(): void {
-  deleteCookie('admin_token');
+  deleteCookie(COOKIE_NAMES.ADMIN_TOKEN);
   window.location.href = '/admin/login';
 }
 
