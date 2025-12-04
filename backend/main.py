@@ -9,7 +9,7 @@ from database import init_db
 import logging
 
 # Импортируем роутеры
-from routers import auth, users, hackathons, teams
+from routers import auth, users, hackathons, teams, invitations, admin
 
 # Логирование
 logging.basicConfig(level=logging.INFO)
@@ -45,11 +45,13 @@ async def startup_event():
     except Exception as e:
         logger.error(f"❌ Database initialization failed: {e}")
 
-# Включаем роутеры
+# Включаем роутеры участника и админа
 app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(hackathons.router)
 app.include_router(teams.router)
+app.include_router(invitations.router)
+app.include_router(admin.router)
 
 # Root endpoint
 @app.get("/")

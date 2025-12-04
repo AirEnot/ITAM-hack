@@ -210,6 +210,12 @@ class TeamExportRow(BaseModel):
     members: str  # comma-separated names
 
 
+class AdminAssignUserRequest(BaseModel):
+    """Запрос админа для ручного распределения участника по команде"""
+    user_id: int
+    team_id: Optional[int] = None  # если None — убрать пользователя из команды
+
+
 # ==================== ERROR RESPONSES ====================
 
 class ErrorResponse(BaseModel):

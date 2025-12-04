@@ -6,7 +6,7 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from database import get_db
 from models import Hackathon, User, Team, UserHackathon, TeamMember
-from schemas import HackathonResponse, HackathonAnalytics, ParticipantExportRow, TeamExportRow
+from schemas import HackathonResponse, HackathonAnalytics, ParticipantExportRow, TeamExportRow, AdminAssignUserRequest
 from dependencies import get_current_admin
 import csv
 import io
@@ -210,3 +210,104 @@ async def export_teams(
         media_type="text/csv",
         headers={"Content-Disposition": f"attachment; filename=teams_{hackathon_id}.csv"}
     )
+
+
+@router.post("/hackathons/{hackathon_id}/assign-user")
+async def admin_assign_user_to_team(
+    hackathon_id: int,
+    request: AdminAssignUserRequest,
+    db: Session = Depends(get_db),
+    current_admin = Depends(get_current_admin)
+):
+    """
+    Ручное распределение участника по команде хакатона.
+
+    - Если передан team_id — добавить участника в эту команду (если он ещё не в команде этого хакатона)
+    - Если team_id == null — удалить участника из команды (оставить без команды)
+    """
+
+    # Проверяем, что хакатон существует
+    hackathon = db.query(Hackathon).filter(Hackathon.id == hackathon_id).first()
+    if not hackathon:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Hackathon not found"
+        )
+
+    # Проверяем, что пользователь существует
+    user = db.query(User).filter(User.id == request.user_id).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+
+    # Находим (или создаём) запись участия пользователя в хакатоне
+    registration = db.query(UserHackathon).filter(
+        UserHackathon.user_id == request.user_id,
+        UserHackathon.hackathon_id == hackathon_id
+    ).first()
+
+    if request.team_id is None:
+        # Снять пользователя с команды (оставить участником хакатона без команды)
+        if not registration:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="User is not registered for this hackathon"
+            )
+
+        # Удаляем членство в команде, если есть
+        if registration.team_id:
+            db.query(TeamMember).filter(
+                TeamMember.team_id == registration.team_id,
+                TeamMember.user_id == request.user_id
+            ).delete()
+
+        registration.team_id = None
+        db.commit()
+        return {"message": "User unassigned from any team in this hackathon"}
+
+    # Если команда указана, проверяем её
+    team = db.query(Team).filter(Team.id == request.team_id).first()
+    if not team or team.hackathon_id != hackathon_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Team not found in this hackathon"
+        )
+
+    # Проверяем, не состоит ли пользователь уже в какой-либо команде этого хакатона
+    if registration and registration.team_id is not None:
+        if registration.team_id == request.team_id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="User is already in this team"
+            )
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User is already in a team for this hackathon"
+        )
+
+    # Если регистрации не было, создаём её
+    if not registration:
+        registration = UserHackathon(
+            user_id=request.user_id,
+            hackathon_id=hackathon_id,
+            team_id=request.team_id
+        )
+        db.add(registration)
+    else:
+        registration.team_id = request.team_id
+
+    # Добавляем пользователя в команду
+    existing_member = db.query(TeamMember).filter(
+        TeamMember.team_id == request.team_id,
+        TeamMember.user_id == request.user_id
+    ).first()
+
+    if not existing_member:
+        member = TeamMember(team_id=request.team_id, user_id=request.user_id)
+        db.add(member)
+
+    db.commit()
+
+    return {"message": "User assigned to team", "team_id": request.team_id, "user_id": request.user_id}
