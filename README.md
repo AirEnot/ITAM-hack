@@ -46,22 +46,7 @@ uvicorn main:app --reload --port 8000
 
 # 7. Открыть документацию
 # http://localhost:8000/docs
-```
 
-### Вариант 2: Docker (требует Docker и Docker Compose)
-
-```bash
-# 1. Создать .env из .env.example
-cp .env.example .env
-
-# 2. Запустить контейнеры
-docker-compose up -d
-
-# 3. Проверить логи
-docker-compose logs -f backend
-
-# 4. Остановить
-docker-compose down
 ```
 
 ---
