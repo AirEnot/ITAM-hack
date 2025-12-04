@@ -38,6 +38,7 @@ pip install -r requirements.txt
 cp .env.example .env
 
 # 5. Инициализировать БД
+Remove-Item database.sqlite # если нужно пересоздать БД
 python -c "from database import init_db; init_db()"
 
 # 6. Запустить сервер

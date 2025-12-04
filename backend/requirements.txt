@@ -1,6 +1,7 @@
 fastapi
 uvicorn
 sqlalchemy
+bcrypt
 python-dotenv
 pydantic
 pydantic-settings
@@ -9,3 +10,6 @@ passlib
 python-multipart
 aiofiles
 httpx
+python-telegram-bot
+requests
+python-dotenv

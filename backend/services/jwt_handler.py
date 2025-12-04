@@ -1,50 +1,59 @@
 """
-services/jwt_handler.py — создание и проверка JWT токенов
+services/jwt_handler.py — работа с JWT токенами
 """
-import jwt
 from datetime import datetime, timedelta
 from typing import Optional
+import jwt
 from config import get_settings
 
+# Получаем настройки
 settings = get_settings()
 
 
-def create_access_token(user_id: int, is_admin: bool = False) -> str:
+def create_access_token(user_id: int, is_admin: bool, expires_delta: Optional[timedelta] = None) -> str:
     """
-    Создать JWT токен
+    Создаёт JWT токен для пользователя
     
-    Args:
-        user_id: ID пользователя
-        is_admin: является ли админом
-    
-    Returns:
-        JWT токен
+    СТАРОЕ имя функции (для совместимости)
     """
-    payload = {
-        "user_id": user_id,
-        "is_admin": is_admin,
-        "exp": datetime.utcnow() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES),
-        "iat": datetime.utcnow()
-    }
+    return create_token(
+        data={
+            "user_id": user_id,
+            "is_admin": is_admin
+        },
+        expires_delta=expires_delta
+    )
+
+
+def create_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
+    """
+    Создаёт JWT токен
     
-    token = jwt.encode(
-        payload,
+    НОВОЕ имя функции (основная)
+    """
+    to_encode = data.copy()
+    
+    # Устанавливаем время истечения
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    
+    to_encode.update({"exp": expire})
+    
+    # Кодируем токен
+    encoded_jwt = jwt.encode(
+        to_encode,
         settings.SECRET_KEY,
         algorithm=settings.ALGORITHM
     )
     
-    return token
+    return encoded_jwt
 
 
-def decode_token(token: str) -> Optional[dict]:
+def decode_token(token: str) -> dict:
     """
-    Декодировать и проверить JWT токен
-    
-    Args:
-        token: JWT токен
-    
-    Returns:
-        Payload если токен валиден, иначе None
+    Декодирует JWT токен и возвращает payload
     """
     try:
         payload = jwt.decode(
@@ -54,24 +63,6 @@ def decode_token(token: str) -> Optional[dict]:
         )
         return payload
     except jwt.ExpiredSignatureError:
-        print("Token expired")
-        return None
+        return None  # Токен истек
     except jwt.InvalidTokenError:
-        print("Invalid token")
-        return None
-
-
-def get_user_id_from_token(token: str) -> Optional[int]:
-    """Получить user_id из токена"""
-    payload = decode_token(token)
-    if payload:
-        return payload.get("user_id")
-    return None
-
-
-def is_admin_token(token: str) -> bool:
-    """Проверить, является ли токен админским"""
-    payload = decode_token(token)
-    if payload:
-        return payload.get("is_admin", False)
-    return False
+        return None  # Токен невалиден

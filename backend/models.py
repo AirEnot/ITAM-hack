@@ -142,3 +142,24 @@ class Admin(Base):
     email = Column(String, unique=True, nullable=False, index=True)
     hashed_password = Column(String, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+
+class AuthCode(Base):
+    __tablename__ = "auth_codes"
+    
+    id = Column(Integer, primary_key=True)
+    code = Column(String, unique=True, nullable=False)  # 123456
+    telegram_id = Column(String, nullable=False)  # ID юзера в ТГ
+    telegram_username = Column(String)  # @username
+    is_used = Column(Boolean, default=False)  # Использован ли код
+    expires_at = Column(DateTime, nullable=False)  # Когда истекает
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    def is_expired(self) -> bool:
+        """Проверить что код не истек"""
+        return datetime.utcnow() > self.expires_at
+    
+    def is_valid(self) -> bool:
+        """Проверить что код валиден"""
+        return not self.is_used and not self.is_expired()

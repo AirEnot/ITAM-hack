@@ -5,3 +5,4 @@ Dockerfile
 !README.md
 !FRONTEND_INTEGRATION.md
 __pycache__
+database.sqlite
