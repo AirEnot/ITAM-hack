@@ -1,29 +1,16 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import axios from 'axios';
+import apiClient from '../../utils/api';
 
 const teams = ref<any[]>([]);
 const loading = ref(false);
 const error = ref('');
 
-function getCookie(name: string): string | null {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
-  return null;
-}
-
 async function loadMyTeams() {
   loading.value = true;
   error.value = '';
   try {
-    const token = getCookie('access_token');
-    if (!token) throw new Error('Нет токена');
-
-    const response = await axios.get('http://localhost:8000/api/teams/my', {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
+    const response = await apiClient.get('/api/teams/my');
     teams.value = response.data;
   } catch (e: any) {
     error.value = e?.response?.data?.detail || e?.message || 'Ошибка загрузки команд';

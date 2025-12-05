@@ -1,26 +1,17 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import axios from 'axios';
+import apiClient from '../../utils/api';
 
 const invitations = ref<any[]>([]);
 const loading = ref(false);
 const error = ref('');
 
-function getCookie(name: string): string | null {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
-  return null;
-}
-
 async function loadInvitations() {
   loading.value = true;
   error.value = '';
   try {
-    const token = getCookie('access_token');
-    if (!token) throw new Error('Нет токена');
-    const response = await axios.get('http://localhost:8000/api/invitations?status_filter=pending', {
-      headers: { 'Authorization': `Bearer ${token}` },
+    const response = await apiClient.get('/api/invitations', {
+      params: { status_filter: 'pending' },
     });
     invitations.value = response.data;
   } catch (e: any) {
@@ -32,12 +23,8 @@ async function loadInvitations() {
 
 async function respondToInvitation(invitationId: number, accept: boolean) {
   try {
-    const token = getCookie('access_token');
-    if (!token) throw new Error('Нет токена');
-    await axios.post(`http://localhost:8000/api/invitations/${invitationId}/accept`, {
+    await apiClient.post(`/api/invitations/${invitationId}/accept`, {
       accept
-    }, {
-      headers: { 'Authorization': `Bearer ${token}` },
     });
     alert(accept ? 'Приглашение принято!' : 'Приглашение отклонено');
     loadInvitations();

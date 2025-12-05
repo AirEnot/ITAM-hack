@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import axios from 'axios';
+import apiClient from '../../utils/api';
 
 const form = ref({
   full_name: '',
@@ -16,22 +16,11 @@ const loading = ref(false);
 const saving = ref(false);
 const error = ref('');
 
-function getCookie(name: string): string | null {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
-  return null;
-}
-
 async function loadProfile() {
   loading.value = true;
   error.value = '';
   try {
-    const token = getCookie('access_token');
-    if (!token) throw new Error('Нет токена');
-    const response = await axios.get('http://localhost:8000/api/users/me', {
-      headers: { 'Authorization': `Bearer ${token}` },
-    });
+    const response = await apiClient.get('/api/users/me');
     const profile = response.data;
     form.value.full_name = profile.full_name;
     form.value.bio = profile.bio || '';
@@ -61,11 +50,7 @@ async function save() {
   saving.value = true;
   error.value = '';
   try {
-    const token = getCookie('access_token');
-    if (!token) throw new Error('Нет токена');
-    await axios.put('http://localhost:8000/api/users/me', form.value, {
-      headers: { 'Authorization': `Bearer ${token}` },
-    });
+    await apiClient.put('/api/users/me', form.value);
     alert('Профиль обновлен!');
   } catch (e: any) {
     error.value = e?.response?.data?.detail || e?.message || 'Ошибка';

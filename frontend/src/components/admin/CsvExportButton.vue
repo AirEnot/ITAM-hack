@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, defineProps } from 'vue';
-import axios from 'axios';
+import { adminApiClient } from '../../utils/api';
 
 const props = defineProps<{
   url: string;
@@ -10,21 +10,11 @@ const props = defineProps<{
 
 const downloading = ref(false);
 
-function getCookie(name: string): string | null {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
-  return null;
-}
-
 async function downloadCsv() {
   downloading.value = true;
   try {
-    const token = getCookie('admin_token');
-    if (!token) throw new Error('Нет admin_token');
-    const response = await axios.get(props.url, {
+    const response = await adminApiClient.get(props.url, {
       responseType: 'blob',
-      headers: { 'Authorization': `Bearer ${token}` },
     });
     const href = URL.createObjectURL(response.data);
     const link = document.createElement('a');

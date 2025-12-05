@@ -2,13 +2,37 @@
 routers/teams.py — управление командами
 """
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from database import get_db
 from models import Team, TeamMember, User, Invitation, UserHackathon, Hackathon
-from schemas import TeamCreate, TeamResponse, TeamDetailResponse, MyTeamItem
+from schemas import TeamCreate, TeamResponse, TeamDetailResponse, MyTeamItem, TeamMemberResponse, UserProfile
 from dependencies import get_current_user
 
 router = APIRouter(prefix="/api/teams", tags=["teams"])
+
+
+def team_to_response(team: Team) -> TeamResponse:
+    """Преобразовать объект Team в TeamResponse с загруженными данными пользователей"""
+    members_data = []
+    for member in team.members:
+        user = member.user
+        members_data.append(TeamMemberResponse(
+            id=user.id,
+            full_name=user.full_name,
+            role_preference=user.role_preference,
+            skills=user.get_skills()
+        ))
+    
+    return TeamResponse(
+        id=team.id,
+        hackathon_id=team.hackathon_id,
+        name=team.name,
+        description=team.description,
+        captain_id=team.captain_id,
+        status=team.status,
+        created_at=team.created_at,
+        members=members_data
+    )
 
 
 @router.post("", response_model=TeamResponse)
@@ -39,7 +63,19 @@ async def create_team(
             detail="You must register for the hackathon first"
         )
     
-    # Проверяем что пользователь еще не в команде этого хакатона
+    # Проверяем что пользователь еще не создал команду как капитан для этого хакатона
+    existing_captain_team = db.query(Team).filter(
+        Team.captain_id == current_user.id,
+        Team.hackathon_id == request.hackathon_id
+    ).first()
+    
+    if existing_captain_team:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="You have already created a team for this hackathon. One user can create only one team per hackathon."
+        )
+    
+    # Проверяем что пользователь еще не в команде этого хакатона (как участник)
     existing_team = db.query(UserHackathon).filter(
         UserHackathon.user_id == current_user.id,
         UserHackathon.hackathon_id == request.hackathon_id,
@@ -75,9 +111,68 @@ async def create_team(
     registration.team_id = team.id
     
     db.commit()
-    db.refresh(team)
     
-    return TeamResponse.model_validate(team)
+    # Загружаем команду с связанными данными пользователей
+    team = db.query(Team).options(
+        joinedload(Team.members).joinedload(TeamMember.user)
+    ).filter(Team.id == team.id).first()
+    
+    return team_to_response(team)
+
+
+@router.get("/can-create/{hackathon_id}")
+async def can_create_team(
+    hackathon_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Проверить, может ли пользователь создать команду для данного хакатона.
+    Возвращает информацию о возможности создания команды.
+    """
+    # Проверяем что хакатон существует
+    hackathon = db.query(Hackathon).filter(Hackathon.id == hackathon_id).first()
+    if not hackathon:
+        return {
+            "can_create": False,
+            "reason": "Hackathon not found"
+        }
+    
+    # Проверяем что пользователь зарегистрирован на хакатон
+    registration = db.query(UserHackathon).filter(
+        UserHackathon.user_id == current_user.id,
+        UserHackathon.hackathon_id == hackathon_id
+    ).first()
+    
+    if not registration:
+        return {
+            "can_create": False,
+            "reason": "You must register for the hackathon first"
+        }
+    
+    # Проверяем что пользователь еще не создал команду как капитан
+    existing_captain_team = db.query(Team).filter(
+        Team.captain_id == current_user.id,
+        Team.hackathon_id == hackathon_id
+    ).first()
+    
+    if existing_captain_team:
+        return {
+            "can_create": False,
+            "reason": "You have already created a team for this hackathon"
+        }
+    
+    # Проверяем что пользователь еще не в команде этого хакатона
+    if registration.team_id is not None:
+        return {
+            "can_create": False,
+            "reason": "You are already in a team for this hackathon"
+        }
+    
+    return {
+        "can_create": True,
+        "reason": None
+    }
 
 
 @router.get("/my", response_model=list[MyTeamItem])
@@ -130,7 +225,10 @@ async def get_team(
     current_user: User = Depends(get_current_user)
 ):
     """Получить информацию о команде"""
-    team = db.query(Team).filter(Team.id == team_id).first()
+    team = db.query(Team).options(
+        joinedload(Team.members).joinedload(TeamMember.user),
+        joinedload(Team.captain)
+    ).filter(Team.id == team_id).first()
 
     if not team:
         raise HTTPException(
@@ -138,7 +236,28 @@ async def get_team(
             detail="Team not found"
         )
 
-    return TeamDetailResponse.model_validate(team)
+    # Преобразуем в TeamResponse
+    team_response = team_to_response(team)
+    
+    # Добавляем данные капитана для TeamDetailResponse
+    captain = team.captain
+    captain_profile = UserProfile(
+        id=captain.id,
+        telegram_id=captain.telegram_id,
+        telegram_username=captain.telegram_username,
+        full_name=captain.full_name,
+        bio=captain.bio,
+        skills=captain.get_skills(),
+        role_preference=captain.role_preference,
+        experience_level=captain.experience_level,
+        avatar_url=captain.avatar_url,
+        created_at=captain.created_at
+    )
+    
+    return TeamDetailResponse(
+        **team_response.model_dump(),
+        captain=captain_profile
+    )
 
 
 @router.get("/hackathons/{hackathon_id}", response_model=list[TeamResponse])
@@ -149,12 +268,14 @@ async def list_teams_by_hackathon(
     status_filter: str = "open"
 ):
     """Получить список команд в хакатоне"""
-    teams = db.query(Team).filter(
+    teams = db.query(Team).options(
+        joinedload(Team.members).joinedload(TeamMember.user)
+    ).filter(
         Team.hackathon_id == hackathon_id,
         Team.status == status_filter
     ).all()
 
-    return [TeamResponse.model_validate(t) for t in teams]
+    return [team_to_response(t) for t in teams]
 
 
 @router.post("/{team_id}/invite")

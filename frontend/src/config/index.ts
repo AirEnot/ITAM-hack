@@ -8,6 +8,7 @@ export const APP_NAME = 'ITAM Hack Platform';
 
 export const ROUTES = {
   HOME: '/',
+  DASHBOARD: '/dashboard',
   AUTH: '/auth',
   PROFILE: '/profile',
   PROFILE_EDIT: '/profile/edit',

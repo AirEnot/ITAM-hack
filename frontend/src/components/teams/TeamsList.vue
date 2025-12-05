@@ -1,32 +1,32 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import axios from 'axios';
+import { ref, onMounted, computed } from 'vue';
+import apiClient from '../../utils/api';
 import TeamCard from './TeamCard.vue';
 
 const props = defineProps<{
-  hackathonId: number;
+  hackathonId: string | number;
 }>();
 
 const teams = ref<any[]>([]);
 const loading = ref(false);
 const error = ref('');
 
-function getCookie(name: string): string | null {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
-  return null;
-}
+// Преобразуем hackathonId в число
+const hackathonIdNum = computed(() => {
+  const id = typeof props.hackathonId === 'string' 
+    ? parseInt(props.hackathonId, 10) 
+    : props.hackathonId;
+  if (isNaN(id)) {
+    throw new Error('Invalid hackathon ID');
+  }
+  return id;
+});
 
 async function loadTeams() {
   loading.value = true;
   error.value = '';
   try {
-    const token = getCookie('access_token');
-    if (!token) throw new Error('Нет токена');
-    const response = await axios.get(`http://localhost:8000/api/teams/hackathons/${props.hackathonId}`, {
-      headers: { 'Authorization': `Bearer ${token}` },
-    });
+    const response = await apiClient.get(`/api/teams/hackathons/${hackathonIdNum.value}`);
     teams.value = response.data;
   } catch (e: any) {
     error.value = e?.response?.data?.detail || e?.message || 'Ошибка';

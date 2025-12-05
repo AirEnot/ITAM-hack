@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import axios from 'axios';
+import apiClient from '../../utils/api';
 
 const props = defineProps<{
   userId?: number;
@@ -10,25 +10,14 @@ const profile = ref<any>(null);
 const loading = ref(false);
 const error = ref('');
 
-function getCookie(name: string): string | null {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
-  return null;
-}
-
 async function loadProfile() {
   loading.value = true;
   error.value = '';
   try {
-    const token = getCookie('access_token');
-    if (!token) throw new Error('Нет токена');
     const url = props.userId
-      ? `http://localhost:8000/api/users/${props.userId}`
-      : 'http://localhost:8000/api/users/me';
-    const response = await axios.get(url, {
-      headers: { 'Authorization': `Bearer ${token}` },
-    });
+      ? `/api/users/${props.userId}`
+      : '/api/users/me';
+    const response = await apiClient.get(url);
     profile.value = response.data;
   } catch (e: any) {
     error.value = e?.response?.data?.detail || e?.message || 'Ошибка';

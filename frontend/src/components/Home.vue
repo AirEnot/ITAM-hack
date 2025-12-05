@@ -1,19 +1,26 @@
+<script setup lang="ts">
+import { computed } from 'vue';
+import { isUserAuthenticated, isAdminAuthenticated } from '../utils/auth';
+
+const showAuthButtons = computed(() => !isUserAuthenticated() && !isAdminAuthenticated());
+</script>
+
 <template>
   <div class="home-welcome-text">
     <h1>ITAM Hack Platform</h1>
     <p>Веб-платформа для поиска, создания и управления командами для хакатонов.</p>
-    <div class="auth-section">
+    
+    <div v-if="showAuthButtons" class="auth-section">
       <router-link to="/auth" class="auth-button">
         <span class="auth-icon">🔐</span>
         <span>Вход через Telegram</span>
       </router-link>
+      <router-link to="/admin/login" class="auth-button admin-button">
+        <span class="auth-icon">👤</span>
+        <span>Вход для админа</span>
+      </router-link>
     </div>
-    <ul>
-      <li><router-link to="/profile">Профиль пользователя</router-link></li>
-      <li><router-link to="/hackathons">Список хакатонов</router-link></li>
-      <li><router-link to="/team">Моя команда</router-link></li>
-      <li><router-link to="/admin/login">Вход в админку</router-link></li>
-    </ul>
+    
     <div style="margin-top: 2rem; color: #888; font-size: 0.97rem;">
       code design & development: <b>team BDC</b>
     </div>
@@ -75,6 +82,10 @@
 }
 .auth-section {
   margin: 2.5rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
 }
 .auth-button {
   display: inline-flex;
@@ -98,6 +109,14 @@
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(60, 160, 250, 0.4);
   color: #fff;
+}
+.auth-button.admin-button {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+}
+.auth-button.admin-button:hover {
+  background: linear-gradient(135deg, #9d6ff7 0%, #8d4ff0 100%);
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
 }
 .auth-icon {
   font-size: 1.2rem;

@@ -1,10 +1,14 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import axios from 'axios';
+import apiClient from '../../utils/api';
 
 const props = defineProps<{
-  teamId: number;
-  hackathonId: number;
+  teamId: number | string;
+  hackathonId: number | string;
+}>();
+
+const emit = defineEmits<{
+  (e: 'invite-sent'): void;
 }>();
 
 const participants = ref<any[]>([]);
@@ -12,22 +16,14 @@ const loading = ref(false);
 const error = ref('');
 const inviting = ref<number | null>(null);
 
-function getCookie(name: string): string | null {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
-  return null;
-}
-
 async function loadParticipants() {
   loading.value = true;
   error.value = '';
   try {
-    const token = getCookie('access_token');
-    if (!token) throw new Error('Нет токена');
-    const response = await axios.get(`http://localhost:8000/api/users/hackathons/${props.hackathonId}/participants`, {
-      headers: { 'Authorization': `Bearer ${token}` },
-    });
+    const hackathonId = typeof props.hackathonId === 'string' 
+      ? parseInt(props.hackathonId, 10) 
+      : props.hackathonId;
+    const response = await apiClient.get(`/api/users/hackathons/${hackathonId}/participants`);
     participants.value = response.data;
   } catch (e: any) {
     error.value = e?.response?.data?.detail || e?.message || 'Ошибка';
@@ -40,12 +36,14 @@ async function inviteUser(userId: number) {
   if (!confirm('Отправить приглашение этому пользователю?')) return;
   inviting.value = userId;
   try {
-    const token = getCookie('access_token');
-    if (!token) throw new Error('Нет токена');
-    await axios.post(`http://localhost:8000/api/teams/${props.teamId}/invite?user_id=${userId}`, {}, {
-      headers: { 'Authorization': `Bearer ${token}` },
+    const teamId = typeof props.teamId === 'string' 
+      ? parseInt(props.teamId, 10) 
+      : props.teamId;
+    await apiClient.post(`/api/teams/${teamId}/invite`, null, {
+      params: { user_id: userId },
     });
     alert('Приглашение отправлено!');
+    emit('invite-sent');
   } catch (e: any) {
     alert(e?.response?.data?.detail || e?.message || 'Ошибка');
   } finally {

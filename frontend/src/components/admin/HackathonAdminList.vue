@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import axios from 'axios';
+import { adminApiClient } from '../../utils/api';
 import HackathonAdminEdit from './HackathonAdminEdit.vue';
 
 const hackathons = ref<any[]>([]);
@@ -9,22 +9,11 @@ const error = ref('');
 const showCreateForm = ref(false);
 const editingId = ref<number | null>(null);
 
-function getCookie(name: string): string | null {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
-  return null;
-}
-
 async function loadHackathons() {
   loading.value = true;
   error.value = '';
   try {
-    const token = getCookie('admin_token');
-    if (!token) throw new Error('Нет admin_token');
-    const response = await axios.get('http://localhost:8000/api/admin/hackathons', {
-      headers: { 'Authorization': `Bearer ${token}` },
-    });
+    const response = await adminApiClient.get('/api/admin/hackathons');
     hackathons.value = response.data;
   } catch (e: any) {
     error.value = e?.response?.data?.detail || e?.message || 'Ошибка';

@@ -1,9 +1,16 @@
+<script setup lang="ts">
+import { computed } from 'vue';
+import { isUserAuthenticated } from '../utils/auth';
+
+const showNav = computed(() => isUserAuthenticated());
+</script>
+
 <template>
   <div class="app-layout">
     <header class="main-header">
       <div class="container">
         <router-link to="/" class="logo">ITAM HACK</router-link>
-        <nav class="main-nav">
+        <nav v-if="showNav" class="main-nav">
           <router-link to="/hackathons">Хакатоны</router-link>
           <router-link to="/team">Моя команда</router-link>
           <router-link to="/profile">Профиль</router-link>
@@ -13,11 +20,8 @@
     <main class="main-content">
       <router-view />
     </main>
-    <footer class="main-footer">
-      <span>© ITAM Hack Platform 2025</span>
-    </footer>
     <!-- Мобильная навигация -->
-    <nav class="mobile-nav">
+    <nav v-if="showNav" class="mobile-nav">
       <router-link to="/hackathons">🏆<span>Хакатоны</span></router-link>
       <router-link to="/team">👥<span>Моя команда</span></router-link>
       <router-link to="/profile">👤<span>Профиль</span></router-link>

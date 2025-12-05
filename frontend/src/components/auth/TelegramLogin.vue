@@ -50,8 +50,8 @@ async function loginWithCode() {
       setCookie(COOKIE_NAMES.USER_ID, String(userId));
     }
 
-    // Перенаправляем на страницу хакатонов
-    router.push(ROUTES.HACKATHONS);
+    // Перенаправляем на дашборд
+    router.push('/dashboard');
   } catch (e: any) {
     error.value =
       e?.response?.data?.detail ||

@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import AppLayout from '../layouts/AppLayout.vue';
 import AdminLayout from '../layouts/AdminLayout.vue';
+import { isUserAuthenticated, isAdminAuthenticated } from '../utils/auth';
 
 // Auth components
 import TelegramLogin from '../components/auth/TelegramLogin.vue';
@@ -27,22 +28,7 @@ import HackathonAdminList from '../components/admin/HackathonAdminList.vue';
 
 // Home page
 import Home from '../components/Home.vue';
-
-// Helper functions for auth
-function getCookie(name: string): string | null {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
-  return null;
-}
-
-function isUserAuthenticated(): boolean {
-  return getCookie('access_token') !== null;
-}
-
-function isAdminAuthenticated(): boolean {
-  return getCookie('admin_token') !== null;
-}
+import Dashboard from '../components/Dashboard.vue';
 
 const routes = [
   {
@@ -54,6 +40,12 @@ const routes = [
         name: 'home',
         component: Home,
         meta: { requiresAuth: false }
+      },
+      {
+        path: 'dashboard',
+        name: 'dashboard',
+        component: Dashboard,
+        meta: { requiresAuth: true }
       },
       {
         path: 'auth',
@@ -166,7 +158,13 @@ router.beforeEach((to, _from, next) => {
 
   // Redirect from auth page if already authenticated
   if (to.name === 'auth' && isUserAuthenticated()) {
-    next({ name: 'hackathons' });
+    next({ name: 'dashboard' });
+    return;
+  }
+
+  // Redirect authenticated users from home to dashboard
+  if (to.name === 'home' && isUserAuthenticated()) {
+    next({ name: 'dashboard' });
     return;
   }
 

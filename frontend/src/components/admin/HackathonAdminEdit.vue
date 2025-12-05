@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, defineProps, defineEmits } from 'vue';
-import axios from 'axios';
+import { adminApiClient } from '../../utils/api';
 
 const props = defineProps<{
   mode: 'create' | 'edit';
@@ -25,13 +25,6 @@ const loading = ref(false);
 const error = ref('');
 const validationErrors = ref<Record<string, string>>({});
 
-function getCookie(name: string): string | null {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
-  return null;
-}
-
 function formatDateTimeForInput(dateStr: string): string {
   if (!dateStr) return '';
   const d = new Date(dateStr);
@@ -48,11 +41,7 @@ async function loadHackathon() {
   loading.value = true;
   error.value = '';
   try {
-    const token = getCookie('admin_token');
-    if (!token) throw new Error('Нет admin_token');
-    const response = await axios.get(`http://localhost:8000/api/admin/hackathons`, {
-      headers: { 'Authorization': `Bearer ${token}` },
-    });
+    const response = await adminApiClient.get('/api/admin/hackathons');
     const hackathon = response.data.find((h: any) => h.id === props.hackathonId);
     if (!hackathon) throw new Error('Хакатон не найден');
     form.value.name = hackathon.name;
@@ -95,12 +84,9 @@ async function save() {
   loading.value = true;
   error.value = '';
   try {
-    const token = getCookie('admin_token');
-    if (!token) throw new Error('Нет admin_token');
     const url = props.mode === 'create'
-      ? 'http://localhost:8000/api/hackathons'
-      : `http://localhost:8000/api/hackathons/${props.hackathonId}`;
-    const method = props.mode === 'create' ? 'post' : 'put';
+      ? '/api/hackathons'
+      : `/api/hackathons/${props.hackathonId}`;
     const payload: any = {
       name: form.value.name,
       description: form.value.description || null,
@@ -111,9 +97,11 @@ async function save() {
     if (props.mode === 'edit') {
       payload.status = form.value.status;
     }
-    await axios[method](url, payload, {
-      headers: { 'Authorization': `Bearer ${token}` },
-    });
+    if (props.mode === 'create') {
+      await adminApiClient.post(url, payload);
+    } else {
+      await adminApiClient.put(url, payload);
+    }
     emit('saved');
   } catch (e: any) {
     error.value = e?.response?.data?.detail || e?.message || 'Ошибка сохранения';

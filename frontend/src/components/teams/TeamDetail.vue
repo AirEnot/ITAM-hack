@@ -1,31 +1,47 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import axios from 'axios';
+import { ref, onMounted, computed } from 'vue';
+import apiClient from '../../utils/api';
+import InvitePanel from './InvitePanel.vue';
 
 const props = defineProps<{
-  teamId: number;
+  id: string | number; // Параметр из роутера называется 'id'
 }>();
 
 const team = ref<any>(null);
+const currentUser = ref<any>(null);
 const loading = ref(false);
 const error = ref('');
 
-function getCookie(name: string): string | null {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
-  return null;
+// Преобразуем id в число (из роутера приходит строка)
+const teamIdNum = computed(() => {
+  const id = typeof props.id === 'string' 
+    ? parseInt(props.id, 10) 
+    : props.id;
+  if (isNaN(id)) {
+    throw new Error('Invalid team ID');
+  }
+  return id;
+});
+
+// Проверяем, является ли текущий пользователь капитаном
+const isCaptain = computed(() => {
+  return currentUser.value && team.value && currentUser.value.id === team.value.captain_id;
+});
+
+async function loadCurrentUser() {
+  try {
+    const response = await apiClient.get('/api/users/me');
+    currentUser.value = response.data;
+  } catch (e: any) {
+    console.error('Failed to load current user:', e);
+  }
 }
 
 async function loadTeam() {
   loading.value = true;
   error.value = '';
   try {
-    const token = getCookie('access_token');
-    if (!token) throw new Error('Нет токена');
-    const response = await axios.get(`http://localhost:8000/api/teams/${props.teamId}`, {
-      headers: { 'Authorization': `Bearer ${token}` },
-    });
+    const response = await apiClient.get(`/api/teams/${teamIdNum.value}`);
     team.value = response.data;
   } catch (e: any) {
     error.value = e?.response?.data?.detail || e?.message || 'Ошибка';
@@ -34,7 +50,15 @@ async function loadTeam() {
   }
 }
 
-onMounted(loadTeam);
+function handleInviteSent() {
+  // Обновляем информацию о команде после отправки приглашения
+  loadTeam();
+}
+
+onMounted(async () => {
+  await loadCurrentUser();
+  await loadTeam();
+});
 </script>
 
 <template>
@@ -61,6 +85,14 @@ onMounted(loadTeam);
           </div>
         </div>
       </div>
+      
+      <!-- Панель приглашения - только для капитана -->
+      <InvitePanel 
+        v-if="isCaptain && team"
+        :team-id="teamIdNum"
+        :hackathon-id="team.hackathon_id"
+        @invite-sent="handleInviteSent"
+      />
     </div>
   </div>
 </template>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import axios from 'axios';
+import { adminApiClient } from '../../utils/api';
 
 const hackathons = ref<any[]>([]);
 const loading = ref(true);
@@ -9,22 +9,11 @@ const analytics = ref<any|null>(null);
 const analyticsLoading = ref(false);
 const analyticsError = ref('');
 
-function getCookie(name: string): string | null {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
-  return null;
-}
-
 async function fetchHackathons() {
   loading.value = true;
   error.value = '';
   try {
-    const token = getCookie('admin_token');
-    if (!token) throw new Error('Нет admin_token. Войдите как администратор!');
-    const response = await axios.get('http://localhost:8000/api/admin/hackathons', {
-      headers: { 'Authorization': `Bearer ${token}` },
-    });
+    const response = await adminApiClient.get('/api/admin/hackathons');
     hackathons.value = response.data;
   } catch (e: any) {
     error.value = e?.response?.data?.detail || e?.message || 'Ошибка';
@@ -38,11 +27,7 @@ async function fetchAnalytics(hackathonId: number) {
   analyticsLoading.value = true;
   analyticsError.value = '';
   try {
-    const token = getCookie('admin_token');
-    if (!token) throw new Error('Нет admin_token');
-    const response = await axios.get(`http://localhost:8000/api/admin/${hackathonId}/analytics`, {
-      headers: { 'Authorization': `Bearer ${token}` },
-    });
+    const response = await adminApiClient.get(`/api/admin/${hackathonId}/analytics`);
     analytics.value = response.data;
   } catch (e: any) {
     analyticsError.value = e?.response?.data?.detail || e?.message || 'Ошибка';
@@ -52,15 +37,9 @@ async function fetchAnalytics(hackathonId: number) {
 }
 
 async function downloadCSV(url: string, filename: string) {
-  const token = getCookie('admin_token');
-  if (!token) {
-    alert('Нет admin_token!');
-    return;
-  }
   try {
-    const response = await axios.get(url, {
+    const response = await adminApiClient.get(url, {
       responseType: 'blob',
-      headers: { 'Authorization': `Bearer ${token}` },
     });
     const href = URL.createObjectURL(response.data);
     const link = document.createElement('a');

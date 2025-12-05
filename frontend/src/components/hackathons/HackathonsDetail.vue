@@ -1,32 +1,35 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import axios from 'axios';
+import { ref, onMounted, computed } from 'vue';
+import apiClient from '../../utils/api';
+import CreateTeamForm from '../teams/CreateTeamForm.vue';
+import TeamsList from '../teams/TeamsList.vue';
 
 const props = defineProps<{
-  hackathonId: number;
+  id: string | number; // Параметр из роутера называется 'id'
 }>();
 
 const hackathon = ref<any>(null);
 const loading = ref(false);
 const error = ref('');
 const registering = ref(false);
+const teamCreated = ref(false);
 
-function getCookie(name: string): string | null {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
-  return null;
-}
+// Преобразуем id в число (из роутера приходит строка)
+const hackathonIdNum = computed(() => {
+  const id = typeof props.id === 'string' 
+    ? parseInt(props.id, 10) 
+    : props.id;
+  if (isNaN(id)) {
+    throw new Error('Invalid hackathon ID');
+  }
+  return id;
+});
 
 async function loadHackathon() {
   loading.value = true;
   error.value = '';
   try {
-    const token = getCookie('access_token');
-    if (!token) throw new Error('Нет токена');
-    const response = await axios.get(`http://localhost:8000/api/hackathons/${props.hackathonId}`, {
-      headers: { 'Authorization': `Bearer ${token}` },
-    });
+    const response = await apiClient.get(`/api/hackathons/${hackathonIdNum.value}`);
     hackathon.value = response.data;
   } catch (e: any) {
     error.value = e?.response?.data?.detail || e?.message || 'Ошибка';
@@ -39,11 +42,7 @@ async function register() {
   if (!confirm('Зарегистрироваться на этот хакатон?')) return;
   registering.value = true;
   try {
-    const token = getCookie('access_token');
-    if (!token) throw new Error('Нет токена');
-    await axios.post(`http://localhost:8000/api/hackathons/${props.hackathonId}/register`, {}, {
-      headers: { 'Authorization': `Bearer ${token}` },
-    });
+    await apiClient.post(`/api/hackathons/${hackathonIdNum.value}/register`, {});
     alert('Вы успешно зарегистрированы!');
     loadHackathon();
   } catch (e: any) {
@@ -51,6 +50,11 @@ async function register() {
   } finally {
     registering.value = false;
   }
+}
+
+function handleTeamCreated() {
+  teamCreated.value = true;
+  // Можно обновить список команд, если нужно
 }
 
 onMounted(loadHackathon);
@@ -80,6 +84,14 @@ onMounted(loadHackathon);
       <button @click="register" :disabled="registering" class="btn-register">
         {{ registering ? 'Регистрация...' : 'Зарегистрироваться' }}
       </button>
+      
+      <div v-if="hackathon" class="teams-section">
+        <CreateTeamForm 
+          :hackathon-id="hackathonIdNum" 
+          @team-created="handleTeamCreated"
+        />
+        <TeamsList :hackathon-id="hackathonIdNum" />
+      </div>
     </div>
   </div>
 </template>
@@ -158,6 +170,12 @@ onMounted(loadHackathon);
   color: #ff6b6b;
   text-align: center;
   padding: 2rem;
+}
+
+.teams-section {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #3a3a4e;
 }
 </style>
 

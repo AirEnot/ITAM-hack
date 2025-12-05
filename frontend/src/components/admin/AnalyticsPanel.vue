@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, defineProps } from 'vue';
-import axios from 'axios';
+import { adminApiClient } from '../../utils/api';
 
 const props = defineProps<{ hackathonId: number }>();
 
@@ -8,23 +8,12 @@ const analytics = ref<any|null>(null);
 const loading = ref(false);
 const error = ref('');
 
-function getCookie(name: string): string | null {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
-  return null;
-}
-
 async function fetchAnalytics() {
   loading.value = true;
   error.value = '';
   analytics.value = null;
   try {
-    const token = getCookie('admin_token');
-    if (!token) throw new Error('Нет admin_token');
-    const response = await axios.get(`http://localhost:8000/api/admin/${props.hackathonId}/analytics`, {
-      headers: { 'Authorization': `Bearer ${token}` },
-    });
+    const response = await adminApiClient.get(`/api/admin/${props.hackathonId}/analytics`);
     analytics.value = response.data;
   } catch (e: any) {
     error.value = e?.response?.data?.detail || e?.message || 'Ошибка';
