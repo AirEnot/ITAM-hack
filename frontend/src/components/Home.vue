@@ -27,7 +27,7 @@ const showAuthButtons = computed(() => !isUserAuthenticated() && !isAdminAuthent
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="css">
 .home-welcome-text {
   text-align: center;
   padding: 2rem 1rem 2rem 1rem;
@@ -38,16 +38,6 @@ const showAuthButtons = computed(() => !isUserAuthenticated() && !isAdminAuthent
   letter-spacing: 1.5px;
   margin-bottom: 1rem;
   color: #70bfff;
-}
-@media (min-width: 640px) {
-  .home-welcome-text {
-    padding: 3rem 0 2rem 0;
-  }
-  .home-welcome-text h1 {
-    font-size: 2.1rem;
-    letter-spacing: 2.1px;
-    margin-bottom: 1.2rem;
-  }
 }
 .home-welcome-text ul {
   margin: 2.2rem auto 1rem auto;
@@ -80,6 +70,7 @@ const showAuthButtons = computed(() => !isUserAuthenticated() && !isAdminAuthent
   box-shadow: 0 6px 20px rgba(60, 160, 250, 0.4);
   color: #fff;
 }
+
 .auth-section {
   margin: 2.5rem 0;
   display: flex;
@@ -87,6 +78,7 @@ const showAuthButtons = computed(() => !isUserAuthenticated() && !isAdminAuthent
   gap: 1rem;
   align-items: center;
 }
+
 .auth-button {
   display: inline-flex;
   align-items: center;
@@ -118,7 +110,19 @@ const showAuthButtons = computed(() => !isUserAuthenticated() && !isAdminAuthent
   background: linear-gradient(135deg, #9d6ff7 0%, #8d4ff0 100%);
   box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
 }
+
 .auth-icon {
   font-size: 1.2rem;
+}
+
+@media (min-width: 640px) {
+  .home-welcome-text {
+    padding: 3rem 0 2rem 0;
+  }
+  .home-welcome-text h1 {
+    font-size: 2.1rem;
+    letter-spacing: 2.1px;
+    margin-bottom: 1.2rem;
+  }
 }
 </style>

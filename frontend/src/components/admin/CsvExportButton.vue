@@ -39,7 +39,7 @@ async function downloadCsv() {
   </button>
 </template>
 
-<style scoped>
+<style scoped lang="css">
 .csv-btn {
   border: none;
   padding: 0.5rem 1.1rem;
@@ -56,6 +56,7 @@ async function downloadCsv() {
   background: #7698a2;
   cursor: wait;
 }
+
 .loader {
   display: inline-block;
   width: 22px;
@@ -66,6 +67,7 @@ async function downloadCsv() {
   animation: spin-csv 0.7s linear infinite;
   vertical-align: middle;
 }
+
 @keyframes spin-csv {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }

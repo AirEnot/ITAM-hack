@@ -15,17 +15,24 @@
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="css">
 .admin-layout {
   min-height: 100vh;
   background: #0f0f1a;
   color: #ececec;
 }
+
 .admin-header {
   background: #1a1a2e;
   border-bottom: 2px solid #2a2a3e;
   padding: 1rem 0;
 }
+.admin-header h1 {
+  font-size: 1.5rem;
+  color: #4cc5fc;
+  margin: 0;
+}
+
 .admin-header-content {
   max-width: 1400px;
   margin: 0 auto;
@@ -34,11 +41,7 @@
   justify-content: space-between;
   align-items: center;
 }
-.admin-header h1 {
-  font-size: 1.5rem;
-  color: #4cc5fc;
-  margin: 0;
-}
+
 .admin-nav {
   display: flex;
   gap: 2rem;
@@ -53,11 +56,13 @@
 .admin-nav a.router-link-active {
   color: #4cc5fc;
 }
+
 .admin-main {
   max-width: 1400px;
   margin: 0 auto;
   padding: 2rem;
 }
+
 @media (max-width: 1280px) {
   .admin-header-content {
     flex-direction: column;
@@ -65,4 +70,3 @@
   }
 }
 </style>
-

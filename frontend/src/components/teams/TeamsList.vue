@@ -50,7 +50,7 @@ onMounted(loadTeams);
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="css">
 .teams-list {
   margin-top: 2rem;
 }

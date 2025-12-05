@@ -27,7 +27,7 @@ function formatDate(dateStr: string): string {
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="css">
 .hackathon-card {
   background: #1e1e2e;
   border-radius: 12px;
@@ -47,20 +47,13 @@ function formatDate(dateStr: string): string {
   font-size: 1.1rem;
   line-height: 1.3;
 }
-@media (min-width: 640px) {
-  .hackathon-card {
-    padding: 1.5rem;
-    gap: 1rem;
-  }
-  .hackathon-card h3 {
-    font-size: 1.3rem;
-  }
-}
+
 .description {
   color: #b8b8d4;
   line-height: 1.5;
   flex: 1;
 }
+
 .dates {
   display: flex;
   flex-direction: column;
@@ -68,12 +61,14 @@ function formatDate(dateStr: string): string {
   font-size: 0.9rem;
   color: #aaa;
 }
+
 .meta {
   display: flex;
   justify-content: space-between;
   align-items: center;
   font-size: 0.85rem;
 }
+
 .status {
   padding: 0.3rem 0.8rem;
   border-radius: 6px;
@@ -92,6 +87,7 @@ function formatDate(dateStr: string): string {
   background: #2a2a3e;
   color: #7f7fcf;
 }
+
 .btn-view {
   display: block;
   text-align: center;
@@ -104,6 +100,16 @@ function formatDate(dateStr: string): string {
 }
 .btn-view:hover {
   background: #0a9de0;
+}
+
+@media (min-width: 640px) {
+  .hackathon-card {
+    padding: 1.5rem;
+    gap: 1rem;
+  }
+  .hackathon-card h3 {
+    font-size: 1.3rem;
+  }
 }
 </style>
 

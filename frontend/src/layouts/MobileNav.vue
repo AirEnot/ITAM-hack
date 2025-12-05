@@ -6,7 +6,7 @@
   </nav>
 </template>
 
-<style scoped>
+<style scoped lang="css">
 .mobile-nav {
   display: flex;
   position: fixed;
@@ -37,6 +37,7 @@
   background: #252553;
   color: #60b7ff;
 }
+
 @media (min-width: 800px) {
   .mobile-nav {
     display: none;

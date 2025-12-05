@@ -153,7 +153,7 @@ onMounted(() => {
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="css">
 .create-team-form {
   margin-bottom: 2rem;
 }
@@ -168,7 +168,6 @@ onMounted(() => {
   cursor: pointer;
   transition: background 0.2s;
 }
-
 .btn-create:hover {
   background: #0a6fa5;
 }
@@ -179,7 +178,6 @@ onMounted(() => {
   padding: 1.5rem;
   color: #ececec;
 }
-
 .form-container h3 {
   color: #4cc5fc;
   margin: 0 0 1.5rem 0;
@@ -206,7 +204,6 @@ onMounted(() => {
   flex-direction: column;
   gap: 0.5rem;
 }
-
 .form-group label {
   color: #b8b8d4;
   font-size: 0.9rem;
@@ -224,13 +221,11 @@ onMounted(() => {
   font-family: inherit;
   transition: border-color 0.2s;
 }
-
 .input:focus,
 .textarea:focus {
   outline: none;
   border-color: #0987c7;
 }
-
 .input:disabled,
 .textarea:disabled {
   opacity: 0.6;
@@ -259,11 +254,9 @@ onMounted(() => {
   cursor: pointer;
   transition: background 0.2s;
 }
-
 .btn-submit:hover:not(:disabled) {
   background: #0a6fa5;
 }
-
 .btn-submit:disabled {
   opacity: 0.6;
   cursor: not-allowed;
@@ -279,12 +272,10 @@ onMounted(() => {
   cursor: pointer;
   transition: all 0.2s;
 }
-
 .btn-cancel:hover:not(:disabled) {
   background: #2a2a3e;
   border-color: #4a4a5e;
 }
-
 .btn-cancel:disabled {
   opacity: 0.6;
   cursor: not-allowed;
@@ -303,7 +294,6 @@ onMounted(() => {
   color: #b8b8d4;
   text-align: center;
 }
-
 .cannot-create p {
   margin: 0;
   font-size: 0.9rem;

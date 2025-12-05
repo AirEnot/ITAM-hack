@@ -8,7 +8,6 @@ const form = ref({
   skills: [] as string[],
   role_preference: '',
   experience_level: 'junior',
-  avatar_url: ''
 });
 
 const newSkill = ref('');
@@ -27,7 +26,6 @@ async function loadProfile() {
     form.value.skills = profile.skills || [];
     form.value.role_preference = profile.role_preference || '';
     form.value.experience_level = profile.experience_level;
-    form.value.avatar_url = profile.avatar_url || '';
   } catch (e: any) {
     error.value = e?.response?.data?.detail || e?.message || 'Ошибка';
   } finally {
@@ -106,17 +104,13 @@ onMounted(loadProfile);
           </span>
         </div>
       </div>
-      <div class="form-group">
-        <label>URL аватарки</label>
-        <input v-model="form.avatar_url" type="url" />
-      </div>
       <div v-if="error" class="error">{{ error }}</div>
       <button type="submit" :disabled="saving" class="btn-save">Сохранить</button>
     </form>
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="css">
 .profile-edit {
   max-width: 600px;
   width: 100%;
@@ -126,15 +120,11 @@ onMounted(loadProfile);
   padding: 1.5rem;
   color: #ececec;
 }
-@media (min-width: 640px) {
-  .profile-edit {
-    padding: 2rem;
-  }
-}
 .profile-edit h2 {
   color: #4cc5fc;
   margin-bottom: 1.5rem;
 }
+
 .form-group {
   margin-bottom: 1.5rem;
 }
@@ -154,6 +144,7 @@ onMounted(loadProfile);
   color: #ececec;
   font-size: 1rem;
 }
+
 .skills-input {
   display: flex;
   flex-direction: column;
@@ -172,16 +163,22 @@ onMounted(loadProfile);
   cursor: pointer;
   white-space: nowrap;
 }
+
 @media (min-width: 640px) {
+  .profile-edit {
+    padding: 2rem;
+  }
+
   .skills-input {
     flex-direction: row;
   }
-}
+} 
 .skills-list {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
 }
+
 .skill-tag {
   background: #2a2a3e;
   padding: 0.4rem 0.8rem;
@@ -190,6 +187,7 @@ onMounted(loadProfile);
   align-items: center;
   gap: 0.5rem;
 }
+
 .remove-skill {
   background: transparent;
   border: none;
@@ -203,6 +201,7 @@ onMounted(loadProfile);
   align-items: center;
   justify-content: center;
 }
+
 .btn-save {
   width: 100%;
   padding: 0.8rem;
@@ -218,9 +217,12 @@ onMounted(loadProfile);
   background: #555;
   cursor: not-allowed;
 }
+
 .error {
   color: #ff6b6b;
   margin-bottom: 1rem;
 }
+
+
 </style>
 

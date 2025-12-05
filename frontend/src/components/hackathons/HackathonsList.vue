@@ -35,7 +35,7 @@ onMounted(loadHackathons);
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="css">
 .hackathons-list {
   max-width: 1200px;
   width: 100%;
@@ -46,22 +46,32 @@ onMounted(loadHackathons);
   margin-bottom: 1.5rem;
   font-size: 1.5rem;
 }
+
 .cards-grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 1rem;
 }
+
 .error {
   color: #ff6b6b;
   text-align: center;
   padding: 1.5rem;
   font-size: 0.9rem;
 }
+
 .empty {
   text-align: center;
   color: #888;
   padding: 2rem 1rem;
 }
+
+@media (min-width: 1024px) {
+  .cards-grid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+}
+
 @media (min-width: 640px) {
   .hackathons-list h1 {
     font-size: 2rem;
@@ -76,11 +86,6 @@ onMounted(loadHackathons);
   }
   .empty {
     padding: 3rem;
-  }
-}
-@media (min-width: 1024px) {
-  .cards-grid {
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   }
 }
 </style>
