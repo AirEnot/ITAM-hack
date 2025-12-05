@@ -122,23 +122,16 @@ onMounted(loadDashboard);
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="css">
 .dashboard {
   max-width: 1200px;
   width: 100%;
   margin: 0 auto;
 }
-
 .dashboard h1 {
   color: #4cc5fc;
   margin-bottom: 2rem;
   font-size: 1.8rem;
-}
-
-@media (min-width: 640px) {
-  .dashboard h1 {
-    font-size: 2.2rem;
-  }
 }
 
 .loading {
@@ -167,19 +160,12 @@ onMounted(loadDashboard);
   padding: 1.5rem;
 }
 
-@media (min-width: 640px) {
-  .dashboard-section {
-    padding: 2rem;
-  }
-}
-
 .section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1.5rem;
 }
-
 .section-header h2 {
   color: #4cc5fc;
   font-size: 1.3rem;
@@ -192,7 +178,6 @@ onMounted(loadDashboard);
   font-size: 0.9rem;
   transition: color 0.2s;
 }
-
 .view-all:hover {
   color: #4cc5fc;
 }
@@ -219,7 +204,6 @@ onMounted(loadDashboard);
 .team-info {
   flex: 1;
 }
-
 .invitation-info strong,
 .team-info h3 {
   color: #ececec;
@@ -239,13 +223,6 @@ onMounted(loadDashboard);
   gap: 1rem;
 }
 
-@media (min-width: 640px) {
-  .hackathons-grid {
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1.5rem;
-  }
-}
-
 .btn-view {
   padding: 0.6rem 1.2rem;
   background: #0987c7;
@@ -256,7 +233,6 @@ onMounted(loadDashboard);
   white-space: nowrap;
   transition: background 0.2s;
 }
-
 .btn-view:hover {
   background: #0a6fa5;
 }
@@ -268,7 +244,6 @@ onMounted(loadDashboard);
   border-radius: 12px;
   color: #b8b8d4;
 }
-
 .empty-state p {
   margin-bottom: 1.5rem;
   font-size: 1.1rem;
@@ -284,9 +259,23 @@ onMounted(loadDashboard);
   font-size: 1rem;
   transition: background 0.2s;
 }
-
 .btn-primary:hover {
   background: #0a6fa5;
+}
+
+@media (min-width: 640px) {
+  .dashboard h1 {
+    font-size: 2.2rem;
+  }
+
+  .hackathons-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .dashboard-section {
+    padding: 2rem;
+  }
 }
 </style>
 

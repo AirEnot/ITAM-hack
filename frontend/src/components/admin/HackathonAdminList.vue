@@ -86,12 +86,13 @@ onMounted(loadHackathons);
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="css">
 .hackathon-admin-list {
   max-width: 1200px;
   width: 100%;
   margin: 0 auto;
 }
+
 .header {
   display: flex;
   flex-direction: column;
@@ -102,17 +103,7 @@ onMounted(loadHackathons);
   color: #4cc5fc;
   font-size: 1.5rem;
 }
-@media (min-width: 768px) {
-  .header {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-  }
-  .header h1 {
-    font-size: 2rem;
-  }
-}
+
 .btn-create {
   padding: 0.7rem 1.5rem;
   background: #0987c7;
@@ -122,10 +113,12 @@ onMounted(loadHackathons);
   cursor: pointer;
   font-size: 1rem;
 }
+
 .table-wrapper {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
+
 .hackathons-table {
   width: 100%;
   min-width: 800px;
@@ -146,13 +139,7 @@ onMounted(loadHackathons);
   color: #4cc5fc;
   white-space: nowrap;
 }
-@media (min-width: 768px) {
-  .hackathons-table th,
-  .hackathons-table td {
-    padding: 1rem;
-    font-size: 1rem;
-  }
-}
+
 .status {
   padding: 0.3rem 0.8rem;
   border-radius: 6px;
@@ -171,6 +158,7 @@ onMounted(loadHackathons);
   background: #2a2a3e;
   color: #7f7fcf;
 }
+
 .btn-edit {
   padding: 0.5rem 1rem;
   background: #0987c7;
@@ -179,10 +167,29 @@ onMounted(loadHackathons);
   border-radius: 6px;
   cursor: pointer;
 }
+
 .error {
   color: #ff6b6b;
   text-align: center;
   padding: 2rem;
+}
+
+@media (min-width: 768px) {
+  .header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+  .header h1 {
+    font-size: 2rem;
+  }
+
+  .hackathons-table th,
+  .hackathons-table td {
+    padding: 1rem;
+    font-size: 1rem;
+  }
 }
 </style>
 

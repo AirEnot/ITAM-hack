@@ -52,7 +52,7 @@ async function loginAdmin() {
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="css">
 .login-box {
   max-width: 350px;
   width: 100%;
@@ -61,11 +61,6 @@ async function loginAdmin() {
   background: #222;
   border-radius: 10px;
   color: #fff;
-}
-@media (min-width: 768px) {
-  .login-box {
-    padding: 2rem;
-  }
 }
 .login-box label {
   display: block;
@@ -80,6 +75,7 @@ async function loginAdmin() {
   background: #111;
   color: #fff;
 }
+
 button {
   width: 100%;
   margin-top: 1.2rem;
@@ -92,4 +88,10 @@ button {
   cursor: pointer;
 }
 button:disabled { background: #888; cursor: not-allowed; }
+
+@media (min-width: 768px) {
+  .login-box {
+    padding: 2rem;
+  }
+}
 </style>

@@ -29,7 +29,7 @@ const showNav = computed(() => isUserAuthenticated());
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="css">
 .app-layout {
   min-height: 100vh;
   display: flex;
@@ -37,10 +37,12 @@ const showNav = computed(() => isUserAuthenticated());
   background: #18191c;
   color: #ededed;
 }
+
 .main-header {
   background: #24244b;
   padding: 0.3rem 0;
 }
+
 .logo {
   font-weight: bold;
   font-size: 1.3rem;
@@ -48,6 +50,7 @@ const showNav = computed(() => isUserAuthenticated());
   color: #60b7ff;
   margin-right: 2rem;
 }
+
 .main-header .container {
   max-width: 1100px;
   margin: 0 auto;

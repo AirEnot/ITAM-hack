@@ -42,7 +42,7 @@ onMounted(loadMyTeams);
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="css">
 .my-team {
   max-width: 800px;
   margin: 0 auto;
@@ -51,11 +51,13 @@ onMounted(loadMyTeams);
   color: #4cc5fc;
   margin-bottom: 2rem;
 }
+
 .teams-list {
   display: flex;
   flex-direction: column;
   gap: 1.2rem;
 }
+
 .team-card {
   background: #1e1e2e;
   border-radius: 12px;
@@ -65,11 +67,13 @@ onMounted(loadMyTeams);
 .team-card h3 {
   margin: 0 0 0.5rem 0;
 }
+
 .hackathon-name {
   color: #b8b8d4;
   font-size: 0.9rem;
   margin-top: 0.3rem;
 }
+
 .empty {
   text-align: center;
   padding: 3rem;
@@ -77,6 +81,7 @@ onMounted(loadMyTeams);
   border-radius: 12px;
   color: #b8b8d4;
 }
+
 .btn-find {
   display: inline-block;
   margin-top: 1rem;
@@ -86,6 +91,7 @@ onMounted(loadMyTeams);
   color: #fff;
   text-decoration: none;
 }
+
 .btn-view {
   display: inline-block;
   margin-top: 1rem;
@@ -95,6 +101,7 @@ onMounted(loadMyTeams);
   text-decoration: none;
   border-radius: 6px;
 }
+
 .error {
   color: #ff6b6b;
   text-align: center;

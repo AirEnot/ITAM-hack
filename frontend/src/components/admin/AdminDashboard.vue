@@ -120,7 +120,7 @@ onMounted(fetchHackathons);
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="css">
 .dashboard-wrapper {
   max-width: 1100px;
   width: 100%;
@@ -130,15 +130,18 @@ onMounted(fetchHackathons);
   border-radius: 15px;
   color: #eee;
 }
+
 .dashboard-wrapper h1 {
   font-size: 1.5rem;
   margin-bottom: 1rem;
 }
+
 .table-wrapper {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   margin-top: 1.5rem;
 }
+
 .hacks-table {
   width: 100%;
   min-width: 800px;
@@ -153,23 +156,7 @@ onMounted(fetchHackathons);
   background: #202058;
   white-space: nowrap;
 }
-@media (min-width: 768px) {
-  .dashboard-wrapper {
-    margin: 2rem auto;
-    padding: 2rem;
-  }
-  .dashboard-wrapper h1 {
-    font-size: 2rem;
-    margin-bottom: 2rem;
-  }
-  .table-wrapper {
-    margin-top: 2rem;
-  }
-  .hacks-table th, .hacks-table td {
-    padding: 0.7rem 1rem;
-    font-size: 1rem;
-  }
-}
+
 button {
   padding: 0.4rem 0.8rem;
   margin-bottom: 4px;
@@ -181,16 +168,36 @@ button {
   font-size: 0.85rem;
   white-space: nowrap;
 }
-@media (min-width: 768px) {
-  button {
-    padding: 0.4rem 1.2rem;
-    font-size: 1rem;
-  }
-}
+
 .analytics-block {
   margin-top: 2.5rem;
   background: #25253e;
   padding: 1.2rem 2rem;
   border-radius: 10px;
+}
+
+@media (min-width: 768px) {
+  .dashboard-wrapper {
+    margin: 2rem auto;
+    padding: 2rem;
+  }
+  .dashboard-wrapper h1 {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .table-wrapper {
+    margin-top: 2rem;
+  }
+
+  .hacks-table th, .hacks-table td {
+    padding: 0.7rem 1rem;
+    font-size: 1rem;
+  }
+
+  button {
+    padding: 0.4rem 1.2rem;
+    font-size: 1rem;
+  }
 }
 </style>

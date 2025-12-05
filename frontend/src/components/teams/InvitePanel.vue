@@ -81,7 +81,7 @@ onMounted(loadParticipants);
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="css">
 .invite-panel {
   background: #1e1e2e;
   border-radius: 12px;
@@ -92,11 +92,13 @@ onMounted(loadParticipants);
   color: #4cc5fc;
   margin-bottom: 1rem;
 }
+
 .participants-list {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
+
 .participant-card {
   display: flex;
   flex-direction: column;
@@ -105,6 +107,7 @@ onMounted(loadParticipants);
   padding: 1rem;
   border-radius: 8px;
 }
+
 .participant-info {
   flex: 1;
   width: 100%;
@@ -115,26 +118,14 @@ onMounted(loadParticipants);
   font-size: 0.9rem;
   margin-top: 0.3rem;
 }
-.btn-invite {
-  width: 100%;
-}
-@media (min-width: 640px) {
-  .participant-card {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    gap: 0;
-  }
-  .btn-invite {
-    width: auto;
-  }
-}
+
 .skills {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
   margin-top: 0.5rem;
 }
+
 .skill-tag {
   background: #1a1a2e;
   padding: 0.3rem 0.6rem;
@@ -142,7 +133,9 @@ onMounted(loadParticipants);
   font-size: 0.85rem;
   color: #4cc5fc;
 }
+
 .btn-invite {
+  width: 100%;
   padding: 0.6rem 1.2rem;
   background: #0987c7;
   color: #fff;
@@ -154,13 +147,27 @@ onMounted(loadParticipants);
   background: #555;
   cursor: not-allowed;
 }
+
 .error {
   color: #ff6b6b;
 }
+
 .empty {
   color: #888;
   text-align: center;
   padding: 2rem;
+}
+
+@media (min-width: 640px) {
+  .participant-card {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0;
+  }
+  .btn-invite {
+    width: auto;
+  }
 }
 </style>
 

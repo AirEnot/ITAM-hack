@@ -62,7 +62,7 @@ onMounted(fetchAnalytics);
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="css">
 .analytics-panel {
   background: #23233c;
   border-radius: 11px;
@@ -85,15 +85,18 @@ onMounted(fetchAnalytics);
 .analytics-panel li {
   margin-bottom: 0.63em;
 }
+
 .dist-list {
   list-style-type: circle;
   margin-top: 0.35em;
   margin-bottom: 0.7em;
 }
+
 .analytics-loading {
   color: #70bfff;
   padding: 1.4rem;
 }
+
 .analytics-error {
   color: #fe6565;
   padding: 1.4rem;

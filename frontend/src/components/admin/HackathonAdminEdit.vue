@@ -171,7 +171,7 @@ onMounted(() => {
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="css">
 .hackathon-edit-form {
   max-width: 800px;
   width: 100%;
@@ -181,16 +181,11 @@ onMounted(() => {
   border-radius: 12px;
   color: #ececec;
 }
-@media (min-width: 768px) {
-  .hackathon-edit-form {
-    margin: 2rem auto;
-    padding: 2rem;
-  }
-}
 .hackathon-edit-form h2 {
   color: #4cc5fc;
   margin-bottom: 1.8rem;
 }
+
 .form-group {
   margin-bottom: 1.5rem;
 }
@@ -217,17 +212,20 @@ onMounted(() => {
   outline: none;
   border-color: #4cc5fc;
 }
+
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
 }
+
 .error-text {
   display: block;
   color: #ff6b6b;
   font-size: 0.9rem;
   margin-top: 0.3rem;
 }
+
 .error-message {
   background: #4a1a1a;
   color: #ff6b6b;
@@ -235,12 +233,14 @@ onMounted(() => {
   border-radius: 6px;
   margin-bottom: 1rem;
 }
+
 .form-actions {
   display: flex;
   flex-direction: column;
   gap: 1rem;
   margin-top: 2rem;
 }
+
 .btn-primary,
 .btn-secondary {
   padding: 0.7rem 1.5rem;
@@ -251,16 +251,7 @@ onMounted(() => {
   transition: background 0.15s;
   width: 100%;
 }
-@media (min-width: 640px) {
-  .form-actions {
-    flex-direction: row;
-  }
-  .btn-primary,
-  .btn-secondary {
-    width: auto;
-    padding: 0.7rem 1.8rem;
-  }
-}
+
 .btn-primary {
   background: #0987c7;
   color: #fff;
@@ -272,6 +263,7 @@ onMounted(() => {
   background: #555;
   cursor: not-allowed;
 }
+
 .btn-secondary {
   background: #3a3a4e;
   color: #ececec;
@@ -279,14 +271,33 @@ onMounted(() => {
 .btn-secondary:hover {
   background: #4a4a5e;
 }
+
 .loading {
   text-align: center;
   padding: 2rem;
   color: #70bfff;
 }
-@media (max-width: 768px) {
+
+@media (min-width: 768px) {
+  .hackathon-edit-form {
+    margin: 2rem auto;
+    padding: 2rem;
+  }
+
   .form-row {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 640px) {
+  .form-actions {
+    flex-direction: row;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    width: auto;
+    padding: 0.7rem 1.8rem;
   }
 }
 </style>

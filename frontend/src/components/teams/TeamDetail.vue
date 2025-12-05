@@ -97,12 +97,13 @@ onMounted(async () => {
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="css">
 .team-detail {
   max-width: 800px;
   width: 100%;
   margin: 0 auto;
 }
+
 .detail-card {
   background: #1e1e2e;
   border-radius: 12px;
@@ -114,24 +115,19 @@ onMounted(async () => {
   margin-bottom: 1rem;
   font-size: 1.5rem;
 }
-@media (min-width: 640px) {
-  .detail-card {
-    padding: 2rem;
-  }
-  .detail-card h1 {
-    font-size: 2rem;
-  }
-}
+
 .description {
   color: #b8b8d4;
   margin-bottom: 1.5rem;
 }
+
 .info {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
   margin-bottom: 2rem;
 }
+
 .status {
   padding: 0.3rem 0.8rem;
   border-radius: 6px;
@@ -142,6 +138,7 @@ onMounted(async () => {
   background: #2a3e2a;
   color: #7fcf7f;
 }
+
 .members h3 {
   color: #4cc5fc;
   margin-bottom: 1rem;
@@ -162,12 +159,14 @@ onMounted(async () => {
   font-size: 0.9rem;
   margin-top: 0.3rem;
 }
+
 .skills {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
   margin-top: 0.5rem;
 }
+
 .skill-tag {
   background: #1a1a2e;
   padding: 0.3rem 0.6rem;
@@ -175,10 +174,20 @@ onMounted(async () => {
   font-size: 0.85rem;
   color: #4cc5fc;
 }
+
 .error {
   color: #ff6b6b;
   text-align: center;
   padding: 2rem;
+}
+
+@media (min-width: 640px) {
+  .detail-card {
+    padding: 2rem;
+  }
+  .detail-card h1 {
+    font-size: 2rem;
+  }
 }
 </style>
 

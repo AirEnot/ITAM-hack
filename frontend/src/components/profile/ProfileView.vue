@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import apiClient from '../../utils/api';
+import { logout } from '../../utils/auth';
 
 const props = defineProps<{
   userId?: number;
@@ -26,6 +27,10 @@ async function loadProfile() {
   }
 }
 
+function handleLogout() {
+  logout();
+}
+
 onMounted(loadProfile);
 </script>
 
@@ -35,10 +40,9 @@ onMounted(loadProfile);
     <div v-else-if="error" class="error">{{ error }}</div>
     <div v-else-if="profile" class="profile-card">
       <div class="profile-header">
-        <img v-if="profile.avatar_url" :src="profile.avatar_url" alt="Avatar" class="avatar" />
         <div class="profile-info">
           <h2>{{ profile.full_name }}</h2>
-          <p v-if="profile.telegram_username">@{{ profile.telegram_username }}</p>
+          <p v-if="profile.telegram_username"> telegram: @{{ profile.telegram_username }}</p>
         </div>
       </div>
       <div v-if="profile.bio" class="bio">{{ profile.bio }}</div>
@@ -56,22 +60,28 @@ onMounted(loadProfile);
           </div>
         </div>
       </div>
+      <div class="profile-actions">
+        <router-link to="/profile/edit" class="btn-edit">Редактировать профиль</router-link>
+        <button @click="handleLogout" class="btn-logout">Выйти из аккаунта</button>
+      </div>
     </div>
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="css">
 .profile-view {
   max-width: 600px;
   width: 100%;
   margin: 0 auto;
 }
+
 .profile-card {
   background: #1e1e2e;
   border-radius: 12px;
   padding: 1.5rem;
   color: #ececec;
 }
+
 .profile-header {
   display: flex;
   flex-direction: column;
@@ -80,11 +90,89 @@ onMounted(loadProfile);
   gap: 1rem;
   margin-bottom: 1.5rem;
 }
+
 .avatar {
   width: 80px;
   height: 80px;
   border-radius: 50%;
   object-fit: cover;
+}
+
+.profile-info h2 {
+  margin: 0;
+  color: #4cc5fc;
+}
+
+.bio {
+  margin-bottom: 1.5rem;
+  color: #b8b8d4;
+  line-height: 1.6;
+}
+
+.profile-details {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.detail-item {
+  color: #ececec;
+}
+
+.skills {
+  margin-top: 0.5rem;
+}
+
+.skills-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.skill-tag {
+  background: #2a2a3e;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  color: #4cc5fc;
+}
+
+.profile-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #2a2a3e;
+}
+.btn-edit,
+.btn-logout {
+  padding: 0.7rem 1.2rem;
+  border-radius: 8px;
+  font-size: 0.96rem;
+  text-decoration: none;
+  text-align: center;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s;
+  font-weight: 600;
+}
+.btn-edit {
+  background: #4cc5fc;
+  color: #08131a;
+}
+.btn-edit:hover { opacity: 0.92; }
+.btn-logout {
+  background: #ff6b6b;
+  color: #fff;
+}
+.btn-logout:hover { opacity: 0.92; }
+
+.error {
+  color: #ff6b6b;
+  text-align: center;
+  padding: 2rem;
 }
 @media (min-width: 640px) {
   .profile-card {
@@ -95,44 +183,6 @@ onMounted(loadProfile);
     text-align: left;
     gap: 1.5rem;
   }
-}
-.profile-info h2 {
-  margin: 0;
-  color: #4cc5fc;
-}
-.bio {
-  margin-bottom: 1.5rem;
-  color: #b8b8d4;
-  line-height: 1.6;
-}
-.profile-details {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-.detail-item {
-  color: #ececec;
-}
-.skills {
-  margin-top: 0.5rem;
-}
-.skills-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-}
-.skill-tag {
-  background: #2a2a3e;
-  padding: 0.4rem 0.8rem;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  color: #4cc5fc;
-}
-.error {
-  color: #ff6b6b;
-  text-align: center;
-  padding: 2rem;
 }
 </style>
 

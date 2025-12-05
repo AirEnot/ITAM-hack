@@ -75,7 +75,7 @@ async function loginWithCode() {
 
     <div v-if="botLink" class="bot-link-wrapper">
       <a :href="botLink" target="_blank" rel="noopener noreferrer" class="bot-link-button">
-        Открыть Telegram-бота {{ botUsername ? '@' + botUsername : '' }}
+        Открыть Telegram-бота
       </a>
     </div>
 
@@ -94,7 +94,7 @@ async function loginWithCode() {
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="css">
 .login-box {
   max-width: 380px;
   width: 100%;
@@ -104,12 +104,6 @@ async function loginWithCode() {
   border-radius: 12px;
   color: #fff;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-}
-
-@media (min-width: 768px) {
-  .login-box {
-    padding: 2.2rem;
-  }
 }
 
 .description {
@@ -135,7 +129,6 @@ async function loginWithCode() {
   transition: transform 0.15s ease, box-shadow 0.15s ease;
   box-shadow: 0 6px 18px rgba(34, 158, 217, 0.4);
 }
-
 .bot-link-button:hover {
   transform: translateY(-1px);
   box-shadow: 0 10px 24px rgba(34, 158, 217, 0.55);
@@ -146,7 +139,6 @@ async function loginWithCode() {
   margin-top: 1rem;
   margin-bottom: 0.2rem;
 }
-
 .login-box input {
   width: 100%;
   padding: 0.5rem 0.6rem;
@@ -157,7 +149,6 @@ async function loginWithCode() {
   outline: none;
   transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
 }
-
 .login-box input:focus {
   border-color: #3ca0fa;
   box-shadow: 0 0 0 1px rgba(60, 160, 250, 0.5);
@@ -178,13 +169,11 @@ button {
   transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
   box-shadow: 0 8px 18px rgba(60, 160, 250, 0.4);
 }
-
 button:hover:enabled {
   background: #4bb3ff;
   transform: translateY(-1px);
   box-shadow: 0 10px 24px rgba(60, 160, 250, 0.55);
 }
-
 button:disabled {
   background: #888;
   cursor: not-allowed;
@@ -194,5 +183,11 @@ button:disabled {
 .error {
   margin-top: 0.8rem;
   color: #ff6b6b;
+}
+
+@media (min-width: 768px) {
+  .login-box {
+    padding: 2.2rem;
+  }
 }
 </style>

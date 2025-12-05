@@ -58,7 +58,7 @@ onMounted(loadInvitations);
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="css">
 .invitations-list {
   max-width: 800px;
   margin: 0 auto;
@@ -67,11 +67,13 @@ onMounted(loadInvitations);
   color: #4cc5fc;
   margin-bottom: 2rem;
 }
+
 .invitations-grid {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
 }
+
 .invitation-card {
   background: #1e1e2e;
   border-radius: 12px;
@@ -82,22 +84,19 @@ onMounted(loadInvitations);
   color: #4cc5fc;
   margin-bottom: 0.5rem;
 }
+
 .inviter {
   color: #b8b8d4;
   margin: 1rem 0;
 }
+
 .actions {
   display: flex;
   flex-direction: column;
   gap: 0.8rem;
   margin-top: 1rem;
 }
-@media (min-width: 640px) {
-  .actions {
-    flex-direction: row;
-    gap: 1rem;
-  }
-}
+
 .btn-accept,
 .btn-decline {
   flex: 1;
@@ -115,17 +114,26 @@ onMounted(loadInvitations);
   background: #3e2a2a;
   color: #cf7f7f;
 }
+
 .error {
   color: #ff6b6b;
   text-align: center;
   padding: 2rem;
 }
+
 .empty {
   text-align: center;
   color: #888;
   padding: 3rem;
   background: #1e1e2e;
   border-radius: 12px;
+}
+
+@media (min-width: 640px) {
+  .actions {
+    flex-direction: row;
+    gap: 1rem;
+  }
 }
 </style>
 

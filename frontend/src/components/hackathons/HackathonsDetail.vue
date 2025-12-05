@@ -96,12 +96,13 @@ onMounted(loadHackathon);
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="css">
 .hackathon-detail {
   max-width: 800px;
   width: 100%;
   margin: 0 auto;
 }
+
 .detail-card {
   background: #1e1e2e;
   border-radius: 12px;
@@ -113,24 +114,19 @@ onMounted(loadHackathon);
   margin-bottom: 1rem;
   font-size: 1.5rem;
 }
-@media (min-width: 640px) {
-  .detail-card {
-    padding: 2rem;
-  }
-  .detail-card h1 {
-    font-size: 2rem;
-  }
-}
+
 .description {
   color: #b8b8d4;
   line-height: 1.6;
   margin-bottom: 2rem;
 }
+
 .info-grid {
   display: grid;
   gap: 1rem;
   margin-bottom: 2rem;
 }
+
 .info-item {
   color: #ececec;
 }
@@ -152,6 +148,7 @@ onMounted(loadHackathon);
   background: #2a2a3e;
   color: #7f7fcf;
 }
+
 .btn-register {
   width: 100%;
   padding: 0.8rem;
@@ -166,6 +163,7 @@ onMounted(loadHackathon);
   background: #555;
   cursor: not-allowed;
 }
+
 .error {
   color: #ff6b6b;
   text-align: center;
@@ -176,6 +174,15 @@ onMounted(loadHackathon);
   margin-top: 2rem;
   padding-top: 2rem;
   border-top: 1px solid #3a3a4e;
+}
+
+@media (min-width: 640px) {
+  .detail-card {
+    padding: 2rem;
+  }
+  .detail-card h1 {
+    font-size: 2rem;
+  }
 }
 </style>
 
