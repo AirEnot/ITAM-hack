@@ -1,5 +1,3 @@
- docker-compose.yml
-Dockerfile
 .env
 !README.md
 !FRONTEND_INTEGRATION.md
