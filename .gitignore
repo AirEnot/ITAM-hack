@@ -1,10 +1,8 @@
-*.md 
-docker-compose.yml
+ docker-compose.yml
 Dockerfile
 .env
 !README.md
 !FRONTEND_INTEGRATION.md
 __pycache__
 database.sqlite
-docker-compose.yml
 backend/data/
