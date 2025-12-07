@@ -71,13 +71,49 @@ async def admin_login(request: AdminLoginRequest, db: Session = Depends(get_db))
     """
     Вход админа через email и пароль
     """
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    logger.info(f"Admin login attempt for email: {request.email}")
+    
+    # Проверяем все админов в БД для отладки
+    all_admins = db.query(Admin).all()
+    logger.info(f"Total admins in DB: {len(all_admins)}")
+    for a in all_admins:
+        logger.info(f"  - Admin: id={a.id}, email={a.email}")
+    
     admin = db.query(Admin).filter(Admin.email == request.email).first()
     
-    if not admin or not verify_password(request.password, admin.hashed_password):
+    if not admin:
+        logger.warning(f"Admin not found for email: {request.email}")
+        # Показываем, какие админы есть в БД
+        if all_admins:
+            logger.warning(f"Available admin emails: {[a.email for a in all_admins]}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password"
         )
+    
+    logger.info(f"Admin found: id={admin.id}, email={admin.email}")
+    logger.info(f"Verifying password for admin: {admin.id}")
+    logger.info(f"Password hash length: {len(admin.hashed_password) if admin.hashed_password else 0}")
+    
+    password_valid = verify_password(request.password, admin.hashed_password)
+    logger.info(f"Password verification result: {password_valid}")
+    
+    if not password_valid:
+        logger.warning(f"Invalid password for admin: {admin.id}")
+        # Показываем, какой пароль ожидается из настроек
+        from config import get_settings
+        settings = get_settings()
+        if admin.email == settings.ADMIN_EMAIL:
+            logger.warning(f"Expected password from config: {settings.ADMIN_PASSWORD}")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password"
+        )
+    
+    logger.info(f"Admin login successful for: {admin.id}")
     
     token = create_access_token(user_id=admin.id, is_admin=True)
     return TokenResponse(
