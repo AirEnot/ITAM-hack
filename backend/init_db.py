@@ -4,7 +4,11 @@
 """
 import os
 import sys
-
+from database import SessionLocal
+from models import Admin
+from utils.security import hash_password
+from config import get_settings
+from sqlalchemy.exc import IntegrityError
 # Определяем путь к директории data
 # В Docker: /app/data, локально: ./data
 if os.path.exists("/app"):
