@@ -15,10 +15,12 @@ def generate_code() -> str:
 
 def create_auth_code(
     telegram_id: str,
-    telegram_username: str,
+    telegram_username: str | None,
     db: Session
 ) -> str:
     """Создаёт код авторизации"""
+    import logging
+    logger = logging.getLogger(__name__)
     
     # Генерируем код
     code = generate_code()
@@ -30,26 +32,33 @@ def create_auth_code(
     auth_code = AuthCode(
         code=code,
         telegram_id=telegram_id,
-        telegram_username=telegram_username,
+        telegram_username=telegram_username or f"user_{telegram_id}",
         expires_at=expires_at
     )
     
     db.add(auth_code)
     db.commit()
+    db.refresh(auth_code)
+    
+    logger.info(f"Auth code created: code={code}, telegram_id={telegram_id}, expires_at={expires_at}")
     
     return code
 
 
 def verify_auth_code(code: str, db: Session) -> dict | None:
     """Проверяет код и возвращает данные пользователя если валиден"""
+    import logging
+    logger = logging.getLogger(__name__)
     
     # Ищем код в БД
     auth_code = db.query(AuthCode).filter(AuthCode.code == code).first()
     
     if not auth_code:
+        logger.warning(f"Auth code not found: {code}")
         return None  # Код не найден
     
     if not auth_code.is_valid():
+        logger.warning(f"Auth code invalid - is_used: {auth_code.is_used}, is_expired: {auth_code.is_expired()}, expires_at: {auth_code.expires_at}")
         return None  # Код истек или уже использован
     
     # Помечаем код как использованный

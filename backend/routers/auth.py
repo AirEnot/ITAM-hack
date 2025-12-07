@@ -111,12 +111,18 @@ def generate_telegram_code(
     """
     Генерирует код авторизации для пользователя ТГ
     """
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    logger.info(f"Generating code for telegram_id: {telegram_id}, username: {telegram_username}")
     
     code = create_auth_code(
         telegram_id=telegram_id,
-        telegram_username=telegram_username,
+        telegram_username=telegram_username or f"user_{telegram_id}",
         db=db
     )
+    
+    logger.info(f"Code generated successfully: {code} for telegram_id: {telegram_id}")
     
     return {
         "code": code,
@@ -131,14 +137,21 @@ def verify_telegram_code(
     """
     Проверяет код авторизации и возвращает JWT токен
     """
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    logger.info(f"Attempting to verify code: {code}")
     
     user_data = verify_auth_code(code=code, db=db)
     
     if not user_data:
+        logger.warning(f"Code verification failed for code: {code}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Неверный или истекший код"
         )
+    
+    logger.info(f"Code verified successfully for user_id: {user_data.get('user_id')}")
     
     access_token = create_token(
         data={
