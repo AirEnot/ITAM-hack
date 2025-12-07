@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Копирование файлов зависимостей
-COPY backend/requirements.txt .
+COPY requirements.txt .
 
 # Установка Python зависимостей
 RUN pip install --no-cache-dir -r requirements.txt
@@ -26,4 +26,3 @@ EXPOSE 8000
 
 # Команда запуска с инициализацией БД
 CMD ["sh", "-c", "python init_db.py && uvicorn main:app --host 0.0.0.0 --port 8000"]
-
