@@ -1,9 +1,11 @@
 import axios, { type AxiosInstance } from 'axios';
 import { COOKIE_NAMES } from '../config';
 
-// Используем относительный путь для работы через Vite proxy
-// В production можно использовать переменную окружения
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+// Используем относительный путь для работы через nginx proxy в production
+// В development Vite proxy обрабатывает /api запросы
+// В production nginx проксирует /api к backend
+// Переменная VITE_API_BASE_URL может быть установлена для переопределения (обычно пустая строка)
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || import.meta.env.BACKEND_URL || '';
 
 // Создаем базовый экземпляр axios
 const apiClient: AxiosInstance = axios.create({

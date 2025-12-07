@@ -66,18 +66,96 @@ async def telegram_auth(request: TelegramAuthRequest, db: Session = Depends(get_
 # АВТОРИЗАЦИЯ АДМИНА
 # ════════════════════════════════════════════
 
+@router.get("/admin/debug")  # Временный эндпоинт для отладки
+async def debug_admin_info(db: Session = Depends(get_db)):
+    """Временный эндпоинт для отладки - показывает информацию об админах"""
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    from config import get_settings
+    settings = get_settings()
+    
+    all_admins = db.query(Admin).all()
+    
+    result = {
+        "config_admin_email": settings.ADMIN_EMAIL,
+        "config_admin_password": settings.ADMIN_PASSWORD,
+        "total_admins": len(all_admins),
+        "admins": []
+    }
+    
+    for admin in all_admins:
+        admin_info = {
+            "id": admin.id,
+            "email": admin.email,
+            "has_password": bool(admin.hashed_password),
+            "password_hash_length": len(admin.hashed_password) if admin.hashed_password else 0,
+            "matches_config_email": admin.email == settings.ADMIN_EMAIL
+        }
+        result["admins"].append(admin_info)
+    
+    logger.info(f"Debug admin info: {result}")
+    return result
+
+
 @router.post("/admin/login", response_model=TokenResponse)
 async def admin_login(request: AdminLoginRequest, db: Session = Depends(get_db)):
     """
     Вход админа через email и пароль
     """
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    logger.info(f"Admin login attempt for email: {request.email}")
+    
+    # Проверяем все админов в БД для отладки
+    all_admins = db.query(Admin).all()
+    logger.info(f"Total admins in DB: {len(all_admins)}")
+    for a in all_admins:
+        logger.info(f"  - Admin: id={a.id}, email={a.email}")
+    
     admin = db.query(Admin).filter(Admin.email == request.email).first()
     
-    if not admin or not verify_password(request.password, admin.hashed_password):
+    if not admin:
+        logger.warning(f"Admin not found for email: {request.email}")
+        # Показываем, какие админы есть в БД
+        if all_admins:
+            logger.warning(f"Available admin emails: {[a.email for a in all_admins]}")
+        else:
+            logger.error("No admins found in database! Database may not be initialized.")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password"
         )
+    
+    logger.info(f"Admin found: id={admin.id}, email={admin.email}")
+    logger.info(f"Verifying password for admin: {admin.id}")
+    logger.info(f"Password hash length: {len(admin.hashed_password) if admin.hashed_password else 0}")
+    
+    if not admin.hashed_password:
+        logger.error(f"Admin {admin.id} has no password hash!")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password"
+        )
+    
+    password_valid = verify_password(request.password, admin.hashed_password)
+    logger.info(f"Password verification result: {password_valid}")
+    
+    if not password_valid:
+        logger.warning(f"Invalid password for admin: {admin.id}")
+        # Показываем, какой пароль ожидается из настроек
+        from config import get_settings
+        settings = get_settings()
+        if admin.email == settings.ADMIN_EMAIL:
+            logger.warning(f"Expected password from config: {settings.ADMIN_PASSWORD}")
+            logger.warning(f"Received password length: {len(request.password)}")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password"
+        )
+    
+    logger.info(f"Admin login successful for: {admin.id}")
     
     token = create_access_token(user_id=admin.id, is_admin=True)
     return TokenResponse(
@@ -111,12 +189,18 @@ def generate_telegram_code(
     """
     Генерирует код авторизации для пользователя ТГ
     """
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    logger.info(f"Generating code for telegram_id: {telegram_id}, username: {telegram_username}")
     
     code = create_auth_code(
         telegram_id=telegram_id,
-        telegram_username=telegram_username,
+        telegram_username=telegram_username or f"user_{telegram_id}",
         db=db
     )
+    
+    logger.info(f"Code generated successfully: {code} for telegram_id: {telegram_id}")
     
     return {
         "code": code,
@@ -131,14 +215,21 @@ def verify_telegram_code(
     """
     Проверяет код авторизации и возвращает JWT токен
     """
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    logger.info(f"Attempting to verify code: {code}")
     
     user_data = verify_auth_code(code=code, db=db)
     
     if not user_data:
+        logger.warning(f"Code verification failed for code: {code}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Неверный или истекший код"
         )
+    
+    logger.info(f"Code verified successfully for user_id: {user_data.get('user_id')}")
     
     access_token = create_token(
         data={
