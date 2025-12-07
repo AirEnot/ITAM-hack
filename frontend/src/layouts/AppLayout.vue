@@ -1,8 +1,93 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { ref, onMounted, watch } from 'vue';
+import { useRoute } from 'vue-router';
 import { isUserAuthenticated } from '../utils/auth';
+import apiClient from '../utils/api';
 
-const showNav = computed(() => isUserAuthenticated());
+const route = useRoute();
+const showNav = ref(isUserAuthenticated());
+const pendingInvitationsCount = ref(0);
+const loadingInvitations = ref(false);
+
+// Обновляем состояние авторизации при изменении маршрута
+watch(() => route.path, () => {
+  showNav.value = isUserAuthenticated();
+  if (showNav.value) {
+    loadPendingInvitations();
+  }
+}, { immediate: true });
+
+// Загружаем количество уведомлений (приглашения + заявки)
+async function loadPendingInvitations() {
+  if (!isUserAuthenticated()) {
+    pendingInvitationsCount.value = 0;
+    return;
+  }
+  
+  loadingInvitations.value = true;
+  try {
+    // Загружаем просмотренные уведомления из localStorage
+    let viewedNotifications: number[] = [];
+    try {
+      const viewed = localStorage.getItem('viewedNotifications');
+      if (viewed) {
+        viewedNotifications = JSON.parse(viewed);
+      }
+    } catch (e) {
+      // Игнорируем ошибки
+    }
+    
+    // Загружаем приглашения (фильтруем только pending для счетчика)
+    const invitationsResponse = await apiClient.get('/api/invitations', {
+      params: { status_filter: 'pending' }
+    });
+    // Считаем только непросмотренные pending приглашения
+    let count = invitationsResponse.data?.filter((inv: any) => 
+      inv.status === 'pending' && !viewedNotifications.includes(inv.id)
+    )?.length || 0;
+    
+    // Загружаем заявки на вступление в мои команды (для капитана)
+    try {
+      const applicationsResponse = await apiClient.get('/api/invitations/applications');
+      // Считаем только непросмотренные заявки
+      const unviewedApplications = applicationsResponse.data?.filter((app: any) => 
+        !viewedNotifications.includes(app.id)
+      )?.length || 0;
+      count += unviewedApplications;
+    } catch {
+      // Если нет заявок или пользователь не капитан, это нормально
+    }
+    
+    pendingInvitationsCount.value = count;
+  } catch {
+    pendingInvitationsCount.value = 0;
+  } finally {
+    loadingInvitations.value = false;
+  }
+}
+
+// Слушаем события обновления уведомлений
+function handleNotificationsUpdated() {
+  loadPendingInvitations();
+}
+
+// Слушаем события просмотра уведомлений
+function handleNotificationsViewed() {
+  loadPendingInvitations();
+}
+
+onMounted(() => {
+  showNav.value = isUserAuthenticated();
+  if (showNav.value) {
+    loadPendingInvitations();
+    // Обновляем каждые 30 секунд
+    setInterval(loadPendingInvitations, 30000);
+    
+    // Слушаем события обновления и просмотра уведомлений
+    window.addEventListener('notifications-updated', handleNotificationsUpdated);
+    window.addEventListener('notifications-viewed', handleNotificationsViewed);
+  }
+});
 </script>
 
 <template>
@@ -12,7 +97,11 @@ const showNav = computed(() => isUserAuthenticated());
         <router-link to="/" class="logo">ITAM HACK</router-link>
         <nav v-if="showNav" class="main-nav">
           <router-link to="/hackathons">Хакатоны</router-link>
-          <router-link to="/team">Моя команда</router-link>
+          <router-link to="/team">Мои команды</router-link>
+          <router-link to="/invitations" class="invitations-link">
+            Уведомления
+            <span v-if="pendingInvitationsCount > 0" class="invitations-badge">{{ pendingInvitationsCount }}</span>
+          </router-link>
           <router-link to="/profile">Профиль</router-link>
         </nav>
       </div>
@@ -23,7 +112,11 @@ const showNav = computed(() => isUserAuthenticated());
     <!-- Мобильная навигация -->
     <nav v-if="showNav" class="mobile-nav">
       <router-link to="/hackathons">🏆<span>Хакатоны</span></router-link>
-      <router-link to="/team">👥<span>Моя команда</span></router-link>
+      <router-link to="/team">👥<span>Мои команды</span></router-link>
+      <router-link to="/invitations" class="invitations-link-mobile">
+        💌<span>Уведомления</span>
+        <span v-if="pendingInvitationsCount > 0" class="invitations-badge-mobile">{{ pendingInvitationsCount }}</span>
+      </router-link>
       <router-link to="/profile">👤<span>Профиль</span></router-link>
     </nav>
   </div>
@@ -88,6 +181,49 @@ const showNav = computed(() => isUserAuthenticated());
 .main-nav a:hover::after,
 .main-nav a.router-link-active::after {
   width: 100%;
+}
+
+.invitations-link {
+  position: relative;
+}
+
+.invitations-badge {
+  position: absolute;
+  top: -8px;
+  right: -12px;
+  background: #ff6b6b;
+  color: #fff;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.invitations-link-mobile {
+  position: relative;
+}
+
+.invitations-badge-mobile {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background: #ff6b6b;
+  color: #fff;
+  border-radius: 50%;
+  min-width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: bold;
+  padding: 0 4px;
+  line-height: 1;
 }
 
 .main-content {

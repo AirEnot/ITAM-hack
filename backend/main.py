@@ -29,7 +29,7 @@ app = FastAPI(
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.ALLOWED_ORIGINS,
+    allow_origins=settings.get_allowed_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -42,6 +42,29 @@ async def startup_event():
     try:
         init_db()
         logger.info("✅ Database initialized")
+        
+        # Выводим информацию об админах
+        from database import SessionLocal
+        from models import Admin
+        
+        db = SessionLocal()
+        try:
+            all_admins = db.query(Admin).all()
+            if all_admins:
+                logger.info("="*60)
+                logger.info("📋 ИНФОРМАЦИЯ ОБ АДМИНИСТРАТОРАХ:")
+                logger.info("="*60)
+                for admin in all_admins:
+                    # Для админа из настроек показываем пароль, для остальных - ***
+                    admin_password = settings.ADMIN_PASSWORD if admin.email == settings.ADMIN_EMAIL else "***"
+                    logger.info(f"  👤 Email: {admin.email}")
+                    logger.info(f"     Password: {admin_password}")
+                    logger.info(f"     ID: {admin.id}")
+                logger.info("="*60)
+            else:
+                logger.warning("⚠️  Администраторы не найдены")
+        finally:
+            db.close()
     except Exception as e:
         logger.error(f"❌ Database initialization failed: {e}")
 

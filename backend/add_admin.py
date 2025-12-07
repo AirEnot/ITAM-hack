@@ -25,10 +25,14 @@ def main():
         # Проверяем, нет ли уже такого админа
         existing_admin = db.query(Admin).filter(Admin.email == admin_email).first()
         if existing_admin:
-            print(f"⚠️ Админ с email {admin_email} уже существует (id={existing_admin.id})")
+            # Обновляем пароль существующего админа
+            existing_admin.hashed_password = hash_password(admin_password)
+            db.commit()
+            db.refresh(existing_admin)
+            print(f"✅ Пароль админа обновлен! id={existing_admin.id}, email={existing_admin.email}")
             return
 
-        # Создаём админа
+        # Создаём нового админа
         admin = Admin(
             email=admin_email,
             hashed_password=hash_password(admin_password),

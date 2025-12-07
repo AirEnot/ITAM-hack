@@ -160,6 +160,7 @@ class TeamResponse(BaseModel):
     status: str
     created_at: datetime
     members: List[TeamMemberResponse] = []
+    max_team_size: Optional[int] = None
     
     class Config:
         from_attributes = True
@@ -168,6 +169,8 @@ class TeamResponse(BaseModel):
 class TeamDetailResponse(TeamResponse):
     """Детальная информация о команде с капитаном"""
     captain: UserProfile
+    hackathon: Optional[HackathonResponse] = None
+    max_team_size: Optional[int] = None
 
 
 class MyTeamItem(BaseModel):
@@ -198,6 +201,7 @@ class InvitationResponse(BaseModel):
     responded_at: Optional[datetime]
     team: Optional[TeamResponse] = None
     sent_by: Optional[UserProfile] = None
+    user: Optional[UserProfile] = None  # Пользователь, который подал заявку (для капитана)
     
     class Config:
         from_attributes = True

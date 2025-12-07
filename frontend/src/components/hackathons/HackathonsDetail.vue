@@ -13,6 +13,7 @@ const loading = ref(false);
 const error = ref('');
 const registering = ref(false);
 const teamCreated = ref(false);
+const isRegistered = ref(false);
 
 // Преобразуем id в число (из роутера приходит строка)
 const hackathonIdNum = computed(() => {
@@ -31,6 +32,7 @@ async function loadHackathon() {
   try {
     const response = await apiClient.get(`/api/hackathons/${hackathonIdNum.value}`);
     hackathon.value = response.data;
+    isRegistered.value = response.data.is_registered || false;
   } catch (e: any) {
     error.value = e?.response?.data?.detail || e?.message || 'Ошибка';
   } finally {
@@ -39,6 +41,10 @@ async function loadHackathon() {
 }
 
 async function register() {
+  if (isRegistered.value) {
+    alert('Вы уже зарегистрированы на этот хакатон!');
+    return;
+  }
   if (!confirm('Зарегистрироваться на этот хакатон?')) return;
   registering.value = true;
   try {
@@ -46,7 +52,13 @@ async function register() {
     alert('Вы успешно зарегистрированы!');
     loadHackathon();
   } catch (e: any) {
-    alert(e?.response?.data?.detail || e?.message || 'Ошибка регистрации');
+    const errorMsg = e?.response?.data?.detail || e?.message || 'Ошибка регистрации';
+    if (errorMsg.includes('Already registered')) {
+      alert('Вы уже зарегистрированы на этот хакатон!');
+      loadHackathon();
+    } else {
+      alert(errorMsg);
+    }
   } finally {
     registering.value = false;
   }
@@ -81,7 +93,10 @@ onMounted(loadHackathon);
           <strong>Максимальный размер команды:</strong> {{ hackathon.max_team_size }}
         </div>
       </div>
-      <button @click="register" :disabled="registering" class="btn-register">
+      <div v-if="isRegistered" class="registration-status">
+        <p class="registered-message">✅ Вы зарегистрированы на этот хакатон</p>
+      </div>
+      <button v-else @click="register" :disabled="registering" class="btn-register">
         {{ registering ? 'Регистрация...' : 'Зарегистрироваться' }}
       </button>
       
@@ -162,6 +177,20 @@ onMounted(loadHackathon);
 .btn-register:disabled {
   background: #555;
   cursor: not-allowed;
+}
+
+.registration-status {
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: #2a3e2a;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.registered-message {
+  color: #7fcf7f;
+  margin: 0;
+  font-weight: 600;
 }
 
 .error {

@@ -162,9 +162,13 @@ router.beforeEach((to, _from, next) => {
     return;
   }
 
-  // Redirect authenticated users from home to dashboard
-  if (to.name === 'home' && isUserAuthenticated()) {
-    next({ name: 'dashboard' });
+  // Redirect authenticated users from home to dashboard (только если авторизован)
+  if (to.name === 'home' && (isUserAuthenticated() || isAdminAuthenticated())) {
+    if (isAdminAuthenticated()) {
+      next({ name: 'admin-dashboard' });
+    } else {
+      next({ name: 'dashboard' });
+    }
     return;
   }
 

@@ -218,6 +218,114 @@ async def get_my_teams(
     return result
 
 
+@router.post("/{team_id}/apply")
+async def apply_to_team(
+    team_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Подать заявку на вступление в команду (создает приглашение от пользователя к капитану)"""
+    
+    team = db.query(Team).options(
+        joinedload(Team.members),
+        joinedload(Team.hackathon)
+    ).filter(Team.id == team_id).first()
+    
+    if not team:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Team not found"
+        )
+    
+    # Проверяем что команда открыта
+    if team.status != "open":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Team is not accepting new members"
+        )
+    
+    # Проверяем что пользователь не капитан
+    if team.captain_id == current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="You are the captain of this team"
+        )
+    
+    # Проверяем максимальное количество участников
+    hackathon = team.hackathon
+    if not hackathon:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Hackathon not found for this team"
+        )
+    
+    current_members_count = len(team.members) if team.members else 0
+    if current_members_count >= hackathon.max_team_size:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Team is full. Maximum team size is {hackathon.max_team_size}"
+        )
+    
+    # Проверяем что пользователь зарегистрирован на хакатон
+    user_hackathon = db.query(UserHackathon).filter(
+        UserHackathon.user_id == current_user.id,
+        UserHackathon.hackathon_id == team.hackathon_id
+    ).first()
+    
+    if not user_hackathon:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="You must register for the hackathon first"
+        )
+    
+    # Проверяем что пользователь не в другой команде
+    if user_hackathon.team_id and user_hackathon.team_id != team_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="You are already in another team for this hackathon"
+        )
+    
+    # Проверяем что пользователь не в этой команде
+    existing_member = db.query(TeamMember).filter(
+        TeamMember.team_id == team_id,
+        TeamMember.user_id == current_user.id
+    ).first()
+    
+    if existing_member:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="You are already a member of this team"
+        )
+    
+    # Проверяем что нет активного приглашения
+    existing_invitation = db.query(Invitation).filter(
+        Invitation.team_id == team_id,
+        Invitation.user_id == current_user.id,
+        Invitation.status == "pending"
+    ).first()
+    
+    if existing_invitation:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="You already have a pending invitation to this team"
+        )
+    
+    # Создаем приглашение от капитана к пользователю (как будто капитан пригласил)
+    invitation = Invitation(
+        team_id=team_id,
+        user_id=current_user.id,
+        sent_by_id=team.captain_id
+    )
+    
+    db.add(invitation)
+    db.commit()
+    
+    return {
+        "message": "Application sent. The team captain will review your request.",
+        "invitation_id": invitation.id
+    }
+
+
 @router.get("/{team_id}", response_model=TeamDetailResponse)
 async def get_team(
     team_id: int,
@@ -227,7 +335,8 @@ async def get_team(
     """Получить информацию о команде"""
     team = db.query(Team).options(
         joinedload(Team.members).joinedload(TeamMember.user),
-        joinedload(Team.captain)
+        joinedload(Team.captain),
+        joinedload(Team.hackathon)
     ).filter(Team.id == team_id).first()
 
     if not team:
@@ -254,10 +363,16 @@ async def get_team(
         created_at=captain.created_at
     )
     
-    return TeamDetailResponse(
-        **team_response.model_dump(),
-        captain=captain_profile
-    )
+    team_dict = team_response.model_dump()
+    team_dict["captain"] = captain_profile
+    
+    # Добавляем информацию о хакатоне
+    if team.hackathon:
+        from schemas import HackathonResponse
+        team_dict["hackathon"] = HackathonResponse.model_validate(team.hackathon)
+        team_dict["max_team_size"] = team.hackathon.max_team_size
+    
+    return TeamDetailResponse(**team_dict)
 
 
 @router.get("/hackathons/{hackathon_id}", response_model=list[TeamResponse])
@@ -269,13 +384,25 @@ async def list_teams_by_hackathon(
 ):
     """Получить список команд в хакатоне"""
     teams = db.query(Team).options(
-        joinedload(Team.members).joinedload(TeamMember.user)
+        joinedload(Team.members).joinedload(TeamMember.user),
+        joinedload(Team.hackathon)
     ).filter(
         Team.hackathon_id == hackathon_id,
         Team.status == status_filter
     ).all()
 
-    return [team_to_response(t) for t in teams]
+    result = []
+    for team in teams:
+        team_response = team_to_response(team)
+        # Добавляем max_team_size из хакатона
+        if team.hackathon:
+            team_dict = team_response.model_dump()
+            team_dict["max_team_size"] = team.hackathon.max_team_size
+            result.append(TeamResponse(**team_dict))
+        else:
+            result.append(team_response)
+    
+    return result
 
 
 @router.post("/{team_id}/invite")
@@ -287,7 +414,11 @@ async def invite_to_team(
 ):
     """Пригласить пользователя в команду (может только капитан)"""
     
-    team = db.query(Team).filter(Team.id == team_id).first()
+    team = db.query(Team).options(
+        joinedload(Team.members),
+        joinedload(Team.hackathon)
+    ).filter(Team.id == team_id).first()
+    
     if not team:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -299,6 +430,15 @@ async def invite_to_team(
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Only team captain can send invitations"
+        )
+    
+    # Проверяем максимальное количество участников
+    hackathon = team.hackathon
+    current_members_count = len(team.members) if team.members else 0
+    if current_members_count >= hackathon.max_team_size:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Team is full. Maximum team size is {hackathon.max_team_size}"
         )
     
     # Проверяем что приглашаемый пользователь существует
@@ -399,4 +539,54 @@ async def remove_member(
     
     db.commit()
     
-    return {"message": "Member removed"}
+    return {"message": "Member removed from team"}
+
+
+@router.post("/{team_id}/leave")
+async def leave_team(
+    team_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Выйти из команды (может только участник, не капитан)"""
+    
+    team = db.query(Team).filter(Team.id == team_id).first()
+    if not team:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Team not found"
+        )
+    
+    # Нельзя выйти если ты капитан
+    if team.captain_id == current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Team captain cannot leave the team. Transfer captaincy first or delete the team."
+        )
+    
+    member = db.query(TeamMember).filter(
+        TeamMember.team_id == team_id,
+        TeamMember.user_id == current_user.id
+    ).first()
+    
+    if not member:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="You are not a member of this team"
+        )
+    
+    # Удаляем члена команды
+    db.delete(member)
+    
+    # Обновляем регистрацию пользователя
+    registration = db.query(UserHackathon).filter(
+        UserHackathon.user_id == current_user.id,
+        UserHackathon.team_id == team_id
+    ).first()
+    
+    if registration:
+        registration.team_id = None
+    
+    db.commit()
+    
+    return {"message": "You have left the team"}

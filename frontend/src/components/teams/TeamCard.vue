@@ -14,6 +14,10 @@ const props = defineProps<{
       <span class="status" :class="props.team.status">{{ props.team.status }}</span>
       <span class="members-count">{{ props.team.members?.length || 0 }} участников</span>
     </div>
+    <div v-if="props.team.members && props.team.max_team_size" class="capacity-info">
+      <span class="capacity-text">{{ props.team.members.length }} / {{ props.team.max_team_size }}</span>
+      <span v-if="props.team.members.length >= props.team.max_team_size" class="full-badge">Полная</span>
+    </div>
     <router-link :to="`/teams/${props.team.id}`" class="btn-view">Подробнее</router-link>
   </div>
 </template>
@@ -73,6 +77,28 @@ const props = defineProps<{
 }
 .btn-view:hover {
   background: #0a9de0;
+}
+
+.capacity-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  color: #b8b8d4;
+  margin-top: 0.5rem;
+}
+
+.capacity-text {
+  font-weight: 600;
+}
+
+.full-badge {
+  background: #3e2a2a;
+  color: #cf7f7f;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
 }
 </style>
 

@@ -23,13 +23,13 @@ async def list_hackathons(
     return [HackathonResponse.model_validate(h) for h in hackathons]
 
 
-@router.get("/{hackathon_id}", response_model=HackathonResponse)
+@router.get("/{hackathon_id}")
 async def get_hackathon(
     hackathon_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Получить информацию о хакатоне"""
+    """Получить информацию о хакатоне с информацией о регистрации"""
     hackathon = db.query(Hackathon).filter(Hackathon.id == hackathon_id).first()
     
     if not hackathon:
@@ -38,7 +38,17 @@ async def get_hackathon(
             detail="Hackathon not found"
         )
     
-    return HackathonResponse.model_validate(hackathon)
+    # Проверяем, зарегистрирован ли пользователь
+    registration = db.query(UserHackathon).filter(
+        UserHackathon.user_id == current_user.id,
+        UserHackathon.hackathon_id == hackathon_id
+    ).first()
+    
+    hackathon_data = HackathonResponse.model_validate(hackathon).model_dump()
+    hackathon_data["is_registered"] = registration is not None
+    hackathon_data["team_id"] = registration.team_id if registration else None
+    
+    return hackathon_data
 
 
 @router.post("/{hackathon_id}/register")

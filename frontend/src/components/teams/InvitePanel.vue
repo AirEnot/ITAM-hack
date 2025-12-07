@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import apiClient from '../../utils/api';
 
 const props = defineProps<{
@@ -16,6 +16,16 @@ const loading = ref(false);
 const error = ref('');
 const inviting = ref<number | null>(null);
 
+// Фильтры
+const searchQuery = ref('');
+const roleFilter = ref('');
+const experienceFilter = ref('');
+const skillFilter = ref('');
+
+const availableRoles = ['frontend', 'backend', 'fullstack', 'designer'];
+const availableLevels = ['junior', 'middle', 'senior'];
+const availableSkills = ref<string[]>([]);
+
 async function loadParticipants() {
   loading.value = true;
   error.value = '';
@@ -23,13 +33,49 @@ async function loadParticipants() {
     const hackathonId = typeof props.hackathonId === 'string' 
       ? parseInt(props.hackathonId, 10) 
       : props.hackathonId;
-    const response = await apiClient.get(`/api/users/hackathons/${hackathonId}/participants`);
+    
+    const params: any = {};
+    if (searchQuery.value) params.search = searchQuery.value;
+    if (roleFilter.value) params.role_preference = roleFilter.value;
+    if (experienceFilter.value) params.experience_level = experienceFilter.value;
+    if (skillFilter.value) params.skill = skillFilter.value;
+    
+    const response = await apiClient.get(`/api/users/hackathons/${hackathonId}/participants`, { params });
     participants.value = response.data;
+    
+    // Собираем уникальные навыки для фильтра
+    const skillsSet = new Set<string>();
+    response.data.forEach((p: any) => {
+      if (p.skills && Array.isArray(p.skills)) {
+        p.skills.forEach((s: string) => skillsSet.add(s));
+      }
+    });
+    availableSkills.value = Array.from(skillsSet).sort();
   } catch (e: any) {
     error.value = e?.response?.data?.detail || e?.message || 'Ошибка';
   } finally {
     loading.value = false;
   }
+}
+
+// Debounce функция
+let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+
+// Перезагружаем при изменении фильтров с debounce
+watch([searchQuery, roleFilter, experienceFilter, skillFilter], () => {
+  if (debounceTimer) {
+    clearTimeout(debounceTimer);
+  }
+  debounceTimer = setTimeout(() => {
+    loadParticipants();
+  }, 300);
+});
+
+function clearFilters() {
+  searchQuery.value = '';
+  roleFilter.value = '';
+  experienceFilter.value = '';
+  skillFilter.value = '';
 }
 
 async function inviteUser(userId: number) {
@@ -57,6 +103,38 @@ onMounted(loadParticipants);
 <template>
   <div class="invite-panel">
     <h3>Пригласить участников</h3>
+    
+    <!-- Фильтры -->
+    <div class="filters">
+      <div class="filter-group">
+        <input 
+          v-model="searchQuery" 
+          type="text" 
+          placeholder="Поиск по имени..." 
+          class="filter-input"
+        />
+      </div>
+      <div class="filter-group">
+        <select v-model="roleFilter" class="filter-select">
+          <option value="">Все роли</option>
+          <option v-for="role in availableRoles" :key="role" :value="role">{{ role }}</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <select v-model="experienceFilter" class="filter-select">
+          <option value="">Все уровни</option>
+          <option v-for="level in availableLevels" :key="level" :value="level">{{ level }}</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <select v-model="skillFilter" class="filter-select">
+          <option value="">Все навыки</option>
+          <option v-for="skill in availableSkills" :key="skill" :value="skill">{{ skill }}</option>
+        </select>
+      </div>
+      <button @click="clearFilters" class="btn-clear-filters">Очистить</button>
+    </div>
+    
     <div v-if="loading">Загрузка...</div>
     <div v-else-if="error" class="error">{{ error }}</div>
     <div v-else-if="participants.length === 0" class="empty">Нет доступных участников</div>
@@ -91,6 +169,66 @@ onMounted(loadParticipants);
 .invite-panel h3 {
   color: #4cc5fc;
   margin-bottom: 1rem;
+}
+
+.filters {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: #2a2a3e;
+  border-radius: 8px;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.filter-input,
+.filter-select {
+  width: 100%;
+  padding: 0.6rem;
+  border-radius: 6px;
+  border: 1px solid #444;
+  background: #1a1a2e;
+  color: #fff;
+  font-size: 0.9rem;
+}
+
+.filter-input:focus,
+.filter-select:focus {
+  outline: none;
+  border-color: #4cc5fc;
+}
+
+.btn-clear-filters {
+  padding: 0.6rem 1rem;
+  background: #555;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.btn-clear-filters:hover {
+  background: #666;
+}
+
+@media (min-width: 640px) {
+  .filters {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr auto;
+    gap: 0.8rem;
+    align-items: end;
+  }
+  
+  .filter-group {
+    display: flex;
+    flex-direction: column;
+  }
 }
 
 .participants-list {

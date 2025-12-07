@@ -68,19 +68,42 @@ async def get_hackathon_participants(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
     skip: int = 0,
-    limit: int = 50
+    limit: int = 50,
+    role_preference: str = None,
+    experience_level: str = None,
+    skill: str = None,
+    search: str = None
 ):
-    """Получить список участников хакатона (для поиска команды)"""
+    """Получить список участников хакатона (для поиска команды) с фильтрами"""
     
     from models import UserHackathon
+    import json
     
-    # Получаем всех участников хакатона кроме текущего пользователя
-    participants = db.query(User).join(
+    # Базовый запрос
+    query = db.query(User).join(
         UserHackathon,
         User.id == UserHackathon.user_id
     ).filter(
         UserHackathon.hackathon_id == hackathon_id,
         User.id != current_user.id
-    ).offset(skip).limit(limit).all()
+    )
+    
+    # Фильтр по роли
+    if role_preference:
+        query = query.filter(User.role_preference == role_preference)
+    
+    # Фильтр по уровню опыта
+    if experience_level:
+        query = query.filter(User.experience_level == experience_level)
+    
+    # Фильтр по навыку
+    if skill:
+        query = query.filter(User.skills.contains(f'"{skill}"'))
+    
+    # Поиск по имени
+    if search:
+        query = query.filter(User.full_name.ilike(f"%{search}%"))
+    
+    participants = query.offset(skip).limit(limit).all()
     
     return [UserListItem.model_validate(p) for p in participants]

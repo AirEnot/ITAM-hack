@@ -17,8 +17,8 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440  # 24 часа
     
     # Admin
-    ADMIN_EMAIL: str = "admin@example.com"
-    ADMIN_PASSWORD: str = "123123"
+    ADMIN_EMAIL: str = "at@tt.com"
+    ADMIN_PASSWORD: str = "111111"
     
     # Database
     DATABASE_URL: str = "sqlite:///./database.sqlite"
@@ -29,14 +29,14 @@ class Settings(BaseSettings):
     # Авторизация
     CODE_EXPIRY_MINUTES: int = 10 
 
-    # CORS
-    ALLOWED_ORIGINS: list = [
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "http://localhost:8080",
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-    ]
+    # CORS - можно передать через переменную окружения как строку через запятую
+    ALLOWED_ORIGINS: str = "http://0.0.0.0:3000,http://0.0.0.0:8080,http://0.0.0.0:5173,http://0.0.0.0:80,http://0.0.0.0,http://localhost:3000,http://localhost:5173,http://localhost:80,http://localhost"
+    
+    def get_allowed_origins(self) -> list:
+        """Преобразует строку ALLOWED_ORIGINS в список"""
+        if isinstance(self.ALLOWED_ORIGINS, list):
+            return self.ALLOWED_ORIGINS
+        return [origin.strip() for origin in self.ALLOWED_ORIGINS.split(",") if origin.strip()]
     
     class Config:
         env_file = ".env"

@@ -6,3 +6,5 @@ Dockerfile
 !FRONTEND_INTEGRATION.md
 __pycache__
 database.sqlite
+docker-compose.yml
+backend/data/

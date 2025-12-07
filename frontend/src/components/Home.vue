@@ -1,8 +1,18 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { ref, onMounted } from 'vue';
 import { isUserAuthenticated, isAdminAuthenticated } from '../utils/auth';
 
-const showAuthButtons = computed(() => !isUserAuthenticated() && !isAdminAuthenticated());
+const showAuthButtons = ref(true);
+
+function checkAuth() {
+  showAuthButtons.value = !isUserAuthenticated() && !isAdminAuthenticated();
+}
+
+onMounted(() => {
+  checkAuth();
+  // Проверяем каждую секунду на случай изменения cookies
+  setInterval(checkAuth, 1000);
+});
 </script>
 
 <template>

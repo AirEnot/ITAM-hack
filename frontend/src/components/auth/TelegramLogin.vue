@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { ROUTES, COOKIE_NAMES } from '../../config';
+import { COOKIE_NAMES } from '../../config';
 import apiClient from '../../utils/api';
 import { setCookie } from '../../utils/auth';
 
@@ -65,6 +65,7 @@ async function loginWithCode() {
 
 <template>
   <div class="login-box">
+    <button @click="router.push('/')" class="btn-back">← Назад</button>
     <h2>Вход через Telegram-бота</h2>
 
     <p class="description">
@@ -183,6 +184,23 @@ button:disabled {
 .error {
   margin-top: 0.8rem;
   color: #ff6b6b;
+}
+
+.btn-back {
+  width: auto;
+  padding: 0.5rem 1rem;
+  margin-bottom: 1rem;
+  background: #444;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.2s;
+}
+
+.btn-back:hover {
+  background: #555;
 }
 
 @media (min-width: 768px) {

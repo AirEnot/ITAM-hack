@@ -36,6 +36,7 @@ async function loginAdmin() {
 
 <template>
   <div class="login-box">
+    <button @click="router.push('/')" class="btn-back">← Назад</button>
     <h2>Вход для администратора</h2>
     <form @submit.prevent="loginAdmin">
       <div>
@@ -88,6 +89,23 @@ button {
   cursor: pointer;
 }
 button:disabled { background: #888; cursor: not-allowed; }
+
+.btn-back {
+  width: auto;
+  padding: 0.5rem 1rem;
+  margin-bottom: 1rem;
+  background: #444;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.2s;
+}
+
+.btn-back:hover {
+  background: #555;
+}
 
 @media (min-width: 768px) {
   .login-box {

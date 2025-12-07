@@ -11,7 +11,7 @@ export default defineConfig({
     // Backend работает на порту 8000 (FastAPI)
     proxy: {
       '/api': {
-        target: 'http://localhost:8000',
+        target: 'http://0.0.0.0:8000',
         changeOrigin: true,
         secure: false,
       },
