@@ -1,4 +1,17 @@
-@app.get("/api/debug/db-info")
+from fastapi import APIRouter, Depends, HTTPException, status, Body
+from sqlalchemy.orm import Session
+from datetime import timedelta
+from database import get_db
+from models import User, Admin
+from schemas import TelegramAuthRequest, AdminLoginRequest, TokenResponse
+from services.jwt_handler import create_access_token, create_token
+from services.telegram_auth import create_auth_code, verify_auth_code
+from utils.security import verify_password
+from config import get_settings
+
+router = APIRouter(prefix="/api/debug", tags=["debug"])
+
+@router.get("/api/debug/db-info")
 async def db_info():
     """Временный endpoint для отладки БД"""
     from database import SessionLocal
