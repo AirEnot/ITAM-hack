@@ -94,7 +94,6 @@ button:disabled { background: #888; cursor: not-allowed; }
   width: auto;
   padding: 0.5rem 1rem;
   margin-bottom: 1rem;
-  background: #444;
   color: #fff;
   border: none;
   border-radius: 6px;
@@ -102,7 +101,6 @@ button:disabled { background: #888; cursor: not-allowed; }
   font-size: 0.9rem;
   transition: background 0.2s;
 }
-
 .btn-back:hover {
   background: #555;
 }

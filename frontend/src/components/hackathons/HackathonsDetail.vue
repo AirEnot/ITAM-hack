@@ -93,16 +93,23 @@ onMounted(loadHackathon);
           <strong>Максимальный размер команды:</strong> {{ hackathon.max_team_size }}
         </div>
       </div>
-      <div v-if="isRegistered" class="registration-status">
+      <div v-if="isRegistered && hackathon.status === 'upcoming'" class="registration-status">
         <p class="registered-message">✅ Вы зарегистрированы на этот хакатон</p>
       </div>
       <button v-else @click="register" :disabled="registering" class="btn-register">
         {{ registering ? 'Регистрация...' : 'Зарегистрироваться' }}
       </button>
-      
       <div v-if="hackathon" class="teams-section">
-        <CreateTeamForm 
-          :hackathon-id="hackathonIdNum" 
+        <!-- Если статус active/finished — запрещаем создание команды -->
+        <div v-if="hackathon.status === 'active'" class="cannot-create-banner">
+          <p>Хакатон уже начался, создание команды невозможно.</p>
+        </div>
+        <div v-if="hackathon.status === 'finished'" class="cannot-create-banner">
+          <p>Хакатон завершен</p>
+        </div>
+        <CreateTeamForm
+          v-else
+          :hackathon-id="hackathonIdNum"
           @team-created="handleTeamCreated"
         />
         <TeamsList :hackathon-id="hackathonIdNum" />
@@ -204,6 +211,16 @@ onMounted(loadHackathon);
   padding-top: 2rem;
   border-top: 1px solid #3a3a4e;
 }
+
+.cannot-create-banner {
+  background: #2a2a3e;
+  color: #d8d8f0;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+.cannot-create-banner p { margin: 0; }
 
 @media (min-width: 640px) {
   .detail-card {

@@ -290,6 +290,7 @@ onMounted(() => {
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 0.5rem;
+  margin-left: 1rem;
 }
 
 .notification-header h3 {

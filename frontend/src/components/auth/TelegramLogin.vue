@@ -190,7 +190,6 @@ button:disabled {
   width: auto;
   padding: 0.5rem 1rem;
   margin-bottom: 1rem;
-  background: #444;
   color: #fff;
   border: none;
   border-radius: 6px;

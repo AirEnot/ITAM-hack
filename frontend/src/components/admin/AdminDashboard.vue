@@ -86,8 +86,8 @@ onMounted(fetchHackathons);
             <td>
               <button @click="fetchAnalytics(h.id)">Аналитика</button>
             </td>
-            <td>
-              <button @click="downloadCSV(`http://localhost:8000/api/admin/${h.id}/participants/export`, `participants_${h.id}.csv`)" style="margin-bottom: 4px;">Участники CSV</button><br>
+            <td style="btns">
+              <button @click="downloadCSV(`http://localhost:8000/api/admin/${h.id}/participants/export`, `participants_${h.id}.csv`)">Участники CSV</button><br>
               <button @click="downloadCSV(`http://localhost:8000/api/admin/${h.id}/teams/export`, `teams_${h.id}.csv`)">Команды CSV</button>
             </td>
           </tr>
@@ -95,7 +95,7 @@ onMounted(fetchHackathons);
       </table>
       </div>
     </div>
-    <div v-if="analyticsLoading" style="margin-top:2rem;">Загрузка аналитики...</div>
+    <div v-if="analyticsLoading" style="margin-top:;">Загрузка аналитики...</div>
     <div v-else-if="analyticsError" style="color: red;">Ошибка аналитики: {{ analyticsError }}</div>
     <div v-else-if="analytics" class="analytics-block">
       <h2>Аналитика по хакатону</h2>
@@ -129,6 +129,12 @@ onMounted(fetchHackathons);
   background: #181818;
   border-radius: 15px;
   color: #eee;
+}
+
+.btns {
+  display: flex;
+  flex-direction: column;
+  
 }
 
 .dashboard-wrapper h1 {
@@ -167,6 +173,7 @@ button {
   cursor: pointer;
   font-size: 0.85rem;
   white-space: nowrap;
+
 }
 
 .analytics-block {

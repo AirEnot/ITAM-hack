@@ -1,4 +1,4 @@
- docker-compose.yml
+docker-compose.yml
 Dockerfile
 .env
 !README.md
@@ -6,3 +6,4 @@ Dockerfile
 __pycache__
 database.sqlite
 backend/data/
+node_modules
