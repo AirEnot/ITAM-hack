@@ -7,8 +7,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-BACKEND_URL = os.getenv("BACKEND_URL", "http://backend:8000")
-FRONTEND_URL = os.getenv("FRONTEND_URL", "http://0.0.0.0")
+BACKEND_URL = os.getenv("BACKEND_URL")
+FRONTEND_URL = os.getenv("FRONTEND_URL")
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
