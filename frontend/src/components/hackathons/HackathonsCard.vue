@@ -14,7 +14,6 @@ function formatDate(dateStr: string): string {
 <template>
   <div class="hackathon-card">
     <h3>{{ props.hackathon.name }}</h3>
-    <p v-if="props.hackathon.description" class="description">{{ props.hackathon.description }}</p>
     <div class="dates">
       <div>📅 Начало: {{ formatDate(props.hackathon.start_date) }}</div>
       <div>🏁 Окончание: {{ formatDate(props.hackathon.end_date) }}</div>

@@ -22,7 +22,7 @@ const roleFilter = ref('');
 const experienceFilter = ref('');
 const skillFilter = ref('');
 
-const availableRoles = ['frontend', 'backend', 'fullstack', 'designer'];
+const availableRoles = ['frontend', 'backend', 'fullstack', 'designer', 'product manager'];
 const availableLevels = ['junior', 'middle', 'senior'];
 const availableSkills = ref<string[]>([]);
 
@@ -126,12 +126,12 @@ onMounted(loadParticipants);
           <option v-for="level in availableLevels" :key="level" :value="level">{{ level }}</option>
         </select>
       </div>
-      <div class="filter-group">
+      <!-- <div class="filter-group">
         <select v-model="skillFilter" class="filter-select">
           <option value="">Все навыки</option>
           <option v-for="skill in availableSkills" :key="skill" :value="skill">{{ skill }}</option>
         </select>
-      </div>
+      </div> -->
       <button @click="clearFilters" class="btn-clear-filters">Очистить</button>
     </div>
     

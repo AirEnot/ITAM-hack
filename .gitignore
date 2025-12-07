@@ -1,6 +1,9 @@
+docker-compose.yml
+Dockerfile
 .env
 !README.md
 !FRONTEND_INTEGRATION.md
 __pycache__
 database.sqlite
 backend/data/
+node_modules

@@ -89,6 +89,7 @@ onMounted(loadProfile);
           <option value="backend">Backend</option>
           <option value="fullstack">Fullstack</option>
           <option value="designer">Designer</option>
+          <option value="product manager">Product Manager</option>
         </select>
       </div>
       <div class="form-group">
@@ -148,8 +149,9 @@ onMounted(loadProfile);
 .skills-input {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.9rem;
   margin-bottom: 0.5rem;
+  justify-content: space-between;
 }
 .skills-input input {
   flex: 1;
@@ -164,15 +166,6 @@ onMounted(loadProfile);
   white-space: nowrap;
 }
 
-@media (min-width: 640px) {
-  .profile-edit {
-    padding: 2rem;
-  }
-
-  .skills-input {
-    flex-direction: row;
-  }
-} 
 .skills-list {
   display: flex;
   flex-wrap: wrap;
@@ -223,6 +216,14 @@ onMounted(loadProfile);
   margin-bottom: 1rem;
 }
 
+@media (min-width: 640px) {
+  .profile-edit {
+    padding: 2rem;
+  }
 
+  .skills-input {
+    flex-direction: row;
+  }
+} 
 </style>
 
