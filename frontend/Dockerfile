@@ -7,6 +7,7 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 # Копирование package файлов
+COPY frontend/ .
 COPY package*.json ./
 
 # Установка зависимостей
