@@ -30,7 +30,7 @@ class Settings(BaseSettings):
     CODE_EXPIRY_MINUTES: int = 10 
 
     # CORS - можно передать через переменную окружения как строку через запятую
-    ALLOWED_ORIGINS: str = "http://0.0.0.0:3000,http://0.0.0.0:8080,http://0.0.0.0:5173,http://0.0.0.0:80,http://0.0.0.0,http://localhost:3000,http://localhost:5173,http://localhost:80,http://localhost"
+    ALLOWED_ORIGINS: str = "http://0.0.0.0:3000,http://0.0.0.0:8080,http://0.0.0.0:5173,http://0.0.0.0:80,http://0.0.0.0,http://localhost:3000,http://localhost:5173,http://localhost:80,http://localhost,https://itam-hack-production-2c4b.up.railway.app,https://itam-hack-production.up.railway.app"
     
     def get_allowed_origins(self) -> list:
         """Преобразует строку ALLOWED_ORIGINS в список"""
