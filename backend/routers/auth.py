@@ -66,6 +66,38 @@ async def telegram_auth(request: TelegramAuthRequest, db: Session = Depends(get_
 # АВТОРИЗАЦИЯ АДМИНА
 # ════════════════════════════════════════════
 
+@router.get("/admin/debug")  # Временный эндпоинт для отладки
+async def debug_admin_info(db: Session = Depends(get_db)):
+    """Временный эндпоинт для отладки - показывает информацию об админах"""
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    from config import get_settings
+    settings = get_settings()
+    
+    all_admins = db.query(Admin).all()
+    
+    result = {
+        "config_admin_email": settings.ADMIN_EMAIL,
+        "config_admin_password": settings.ADMIN_PASSWORD,
+        "total_admins": len(all_admins),
+        "admins": []
+    }
+    
+    for admin in all_admins:
+        admin_info = {
+            "id": admin.id,
+            "email": admin.email,
+            "has_password": bool(admin.hashed_password),
+            "password_hash_length": len(admin.hashed_password) if admin.hashed_password else 0,
+            "matches_config_email": admin.email == settings.ADMIN_EMAIL
+        }
+        result["admins"].append(admin_info)
+    
+    logger.info(f"Debug admin info: {result}")
+    return result
+
+
 @router.post("/admin/login", response_model=TokenResponse)
 async def admin_login(request: AdminLoginRequest, db: Session = Depends(get_db)):
     """
@@ -89,6 +121,8 @@ async def admin_login(request: AdminLoginRequest, db: Session = Depends(get_db))
         # Показываем, какие админы есть в БД
         if all_admins:
             logger.warning(f"Available admin emails: {[a.email for a in all_admins]}")
+        else:
+            logger.error("No admins found in database! Database may not be initialized.")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password"
@@ -97,6 +131,13 @@ async def admin_login(request: AdminLoginRequest, db: Session = Depends(get_db))
     logger.info(f"Admin found: id={admin.id}, email={admin.email}")
     logger.info(f"Verifying password for admin: {admin.id}")
     logger.info(f"Password hash length: {len(admin.hashed_password) if admin.hashed_password else 0}")
+    
+    if not admin.hashed_password:
+        logger.error(f"Admin {admin.id} has no password hash!")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password"
+        )
     
     password_valid = verify_password(request.password, admin.hashed_password)
     logger.info(f"Password verification result: {password_valid}")
@@ -108,6 +149,7 @@ async def admin_login(request: AdminLoginRequest, db: Session = Depends(get_db))
         settings = get_settings()
         if admin.email == settings.ADMIN_EMAIL:
             logger.warning(f"Expected password from config: {settings.ADMIN_PASSWORD}")
+            logger.warning(f"Received password length: {len(request.password)}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password"
