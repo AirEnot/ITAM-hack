@@ -23,12 +23,20 @@ async def get_my_invitations(
     from datetime import timedelta
     
     # Получаем pending приглашения для пользователя
+    # Исключаем заявки пользователя (где sent_by_id == captain_id и user_id == current_user.id)
+    # Показываем только реальные приглашения от капитана к пользователю
     pending_invitations = db.query(Invitation).options(
         joinedload(Invitation.team).joinedload(Team.members).joinedload(TeamMember.user),
         joinedload(Invitation.sent_by)
     ).join(Team, Invitation.team_id == Team.id).filter(
         Invitation.user_id == current_user.id,
-        Invitation.status == "pending"
+        Invitation.status == "pending",
+        # Исключаем заявки пользователя: если sent_by_id == captain_id и user_id == current_user.id,
+        # это заявка пользователя, которую еще не обработал капитан - не показываем её
+        ~and_(
+            Invitation.sent_by_id == Team.captain_id,
+            Invitation.user_id == current_user.id
+        )
     ).order_by(Invitation.created_at.desc()).all()
     
     # Получаем недавно обработанные заявки (accepted/declined за последние 7 дней)
@@ -323,7 +331,8 @@ async def get_my_team_applications(
     
     team_ids = [team.id for team in my_teams]
     
-    # Находим все заявки для этих команд, где отправитель не капитан (applicant подает заявку сам)
+    # Находим все заявки для этих команд
+    # Заявка: sent_by_id == captain_id (чтобы капитан получил уведомление), user_id != captain_id (пользователь подает заявку)
     invitations = db.query(Invitation).options(
         joinedload(Invitation.user),
         joinedload(Invitation.team).joinedload(Team.members).joinedload(TeamMember.user),
@@ -333,8 +342,8 @@ async def get_my_team_applications(
             Invitation.team_id.in_(team_ids),
             Invitation.status == "pending",
             Team.captain_id == current_user.id,
-            Invitation.sent_by_id != Team.captain_id,  # заявки подал не капитан
-            Invitation.user_id != Team.captain_id  # исключаем капитана как получателя
+            Invitation.sent_by_id == Team.captain_id,  # заявка направлена капитану
+            Invitation.user_id != Team.captain_id  # исключаем капитана как получателя (пользователь подает заявку)
         )
     ).all()
     
