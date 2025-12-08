@@ -71,7 +71,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         print(f"❌ Ошибка при обработке команды /start: {e}")
         import traceback
         traceback.print_exc()
-        await update.message.reply_text("❌ Ошибка подключения. Попробуйте позже.")
+        await update.message.reply_text("❌ Ошибка подключения. Попробуйте позже. Пожалуйста")
 
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):

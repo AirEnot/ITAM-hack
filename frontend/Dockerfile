@@ -11,10 +11,15 @@ WORKDIR /app
 COPY frontend/package*.json ./
 
 # Установка зависимостей
-RUN npm ci
+RUN npm ci --only=production=false
 
 # Копирование исходного кода
-COPY frontend/ .
+# .dockerignore должен исключить node_modules, но на всякий случай копируем селективно
+COPY frontend/src ./src
+COPY frontend/public ./public
+COPY frontend/index.html ./
+COPY frontend/vite.config.ts ./
+COPY frontend/tsconfig*.json ./
 
 # Сборка приложения
 RUN npm run build
