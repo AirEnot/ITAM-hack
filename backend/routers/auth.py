@@ -218,29 +218,40 @@ def verify_telegram_code(
     import logging
     logger = logging.getLogger(__name__)
     
-    logger.info(f"Attempting to verify code: {code}")
-    
-    user_data = verify_auth_code(code=code, db=db)
-    
-    if not user_data:
-        logger.warning(f"Code verification failed for code: {code}")
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Неверный или истекший код"
+    try:
+        logger.info(f"Attempting to verify code: {code}")
+        
+        user_data = verify_auth_code(code=code, db=db)
+        
+        if not user_data:
+            logger.warning(f"Code verification failed for code: {code}")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Неверный или истекший код"
+            )
+        
+        logger.info(f"Code verified successfully for user_id: {user_data.get('user_id')}")
+        
+        access_token = create_token(
+            data={
+                "user_id": user_data["user_id"],
+                "is_admin": False
+            },
+            expires_delta=timedelta(hours=24)
         )
-    
-    logger.info(f"Code verified successfully for user_id: {user_data.get('user_id')}")
-    
-    access_token = create_token(
-        data={
-            "user_id": user_data["user_id"],
-            "is_admin": False
-        },
-        expires_delta=timedelta(hours=24)
-    )
-    
-    return {
-        "access_token": access_token,
-        "token_type": "bearer",
-        "user": user_data
-    }
+        
+        logger.info(f"Token created successfully for user_id: {user_data.get('user_id')}")
+        
+        return {
+            "access_token": access_token,
+            "token_type": "bearer",
+            "user": user_data
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error during code verification: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Внутренняя ошибка сервера при проверке кода"
+        )

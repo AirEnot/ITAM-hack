@@ -53,10 +53,20 @@ async function loginWithCode() {
     // Перенаправляем на дашборд
     router.push('/dashboard');
   } catch (e: any) {
-    error.value =
-      e?.response?.data?.detail ||
-      e?.message ||
-      'Произошла ошибка при проверке кода';
+    console.error('Login error:', e);
+    // Обработка сетевых ошибок
+    if (e?.networkError || !e?.response) {
+      error.value = 'Ошибка сети. Проверьте подключение к интернету и попробуйте снова.';
+    } else if (e?.response?.status === 401) {
+      error.value = e?.response?.data?.detail || 'Неверный или истекший код. Получите новый код от бота.';
+    } else if (e?.response?.status >= 500) {
+      error.value = 'Ошибка сервера. Попробуйте позже.';
+    } else {
+      error.value =
+        e?.response?.data?.detail ||
+        e?.message ||
+        'Произошла ошибка при проверке кода';
+    }
   } finally {
     loading.value = false;
   }

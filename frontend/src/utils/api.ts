@@ -1,15 +1,27 @@
 import axios, { type AxiosInstance } from 'axios';
 import { COOKIE_NAMES } from '../config';
 
-// Используем относительный путь для работы через nginx proxy в production
-// В development Vite proxy обрабатывает /api запросы
-// В production nginx проксирует /api к backend
+// Используем относительный путь для работы через proxy
+// В development Vite proxy обрабатывает /api запросы (см. vite.config.ts)
+// В production nginx проксирует /api к backend (см. nginx.conf)
 // Переменная VITE_API_BASE_URL может быть установлена для переопределения (обычно пустая строка)
+// ВАЖНО: всегда используем пустую строку или относительный путь, чтобы запросы шли через proxy
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ||
   import.meta.env.VITE_BACKEND_URL ||
   import.meta.env.BACKEND_URL ||
-  'http://localhost:8000';
+  ''; // Пустая строка = относительные пути через proxy
+
+// Логирование для отладки (только в development)
+if (import.meta.env.DEV) {
+  console.log('🔧 API Configuration:', {
+    VITE_API_BASE_URL: import.meta.env.VITE_API_BASE_URL,
+    VITE_BACKEND_URL: import.meta.env.VITE_BACKEND_URL,
+    BACKEND_URL: import.meta.env.BACKEND_URL,
+    'Final API_BASE_URL': API_BASE_URL || '(empty - using relative paths)',
+    'Mode': import.meta.env.MODE,
+  });
+}
 
 // Создаем базовый экземпляр axios
 const apiClient: AxiosInstance = axios.create({
@@ -45,6 +57,14 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
+    // Обработка сетевых ошибок (нет ответа от сервера)
+    if (!error.response) {
+      console.error('Network error:', error.message);
+      // Если это ошибка сети, пробрасываем её дальше с понятным сообщением
+      error.networkError = true;
+      error.message = error.message || 'Ошибка сети. Проверьте подключение к интернету.';
+    }
+    
     if (error.response?.status === 401) {
       // Токен истек или невалиден - очищаем cookies и редиректим на страницу входа
       document.cookie = `${COOKIE_NAMES.ACCESS_TOKEN}=; path=/; max-age=0`;

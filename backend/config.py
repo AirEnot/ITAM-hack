@@ -31,8 +31,8 @@ class Settings:
         
         # API
         self.API_PREFIX: str = os.getenv("API_PREFIX", "/api")
-        self.BACKEND_URL: str = os.getenv("BACKEND_URL", "http://localhost:8000")
-        self.FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://localhost:3000")
+        self.BACKEND_URL: str = os.getenv("BACKEND_URL")
+        self.FRONTEND_URL: str = os.getenv("FRONTEND_URL")
         
         # Авторизация
         self.CODE_EXPIRY_MINUTES: int = int(os.getenv("CODE_EXPIRY_MINUTES", "10"))
