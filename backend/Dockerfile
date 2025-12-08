@@ -1,4 +1,6 @@
 # Backend Dockerfile
+# Контекст сборки: корень проекта (как на Railway)
+# Для docker-compose контекст также должен быть корнем проекта
 FROM python:3.11-slim
 
 WORKDIR /app
@@ -10,13 +12,15 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Копирование файлов зависимостей
-# Контекст сборки уже ./backend, поэтому пути относительные
-COPY requirements.txt .
+# Контекст сборки - корень проекта, поэтому используем backend/requirements.txt
+COPY backend/requirements.txt requirements.txt
+
 # Установка Python зависимостей
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Копирование кода приложения
-COPY . .
+# Контекст сборки - корень проекта, поэтому копируем из backend/
+COPY backend/ /app/
 
 # Создание директории для БД
 RUN mkdir -p /app/data
