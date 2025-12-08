@@ -6,8 +6,8 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Контекст сборки уже ./frontend, поэтому пути относительные
 # Копирование package файлов
-COPY frontend/ .
 COPY package*.json ./
 
 # Установка зависимостей
@@ -26,7 +26,7 @@ FROM nginx:alpine
 COPY --from=builder /app/dist /usr/share/nginx/html
 
 # Копирование конфигурации nginx
-COPY frontend/nginx.conf /etc/nginx/conf.d/default.conf
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Открываем порт
 EXPOSE 80
