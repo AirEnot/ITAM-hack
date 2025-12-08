@@ -47,7 +47,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         
         if response.status_code != 200:
-            await update.message.reply_text("❌ Ошибка сервера. Попробуйте позже.")
+            await update.message.reply_text("❌ Ошибка сервера. Попробуйте позже. Пожалуйста")
             return
         
         data = response.json()
