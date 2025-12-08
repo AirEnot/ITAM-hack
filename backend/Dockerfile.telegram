@@ -1,4 +1,6 @@
 # Telegram Bot Dockerfile
+# Для Railway: контекст сборки - корень проекта, используйте backend/Dockerfile.telegram
+# Для docker-compose: контекст - ./backend, пути будут относительными
 FROM python:3.11-slim
 
 WORKDIR /app
@@ -9,14 +11,18 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Копирование файлов зависимостей
-COPY requirements.txt .
+# Пробуем сначала вариант для Railway (контекст - корень проекта)
+# Если не найден, пробуем вариант для docker-compose (контекст - ./backend)
+COPY backend/requirements.txt requirements.txt
+# Если первый COPY не сработал (docker-compose), будет ошибка, но это нормально
+# В docker-compose.yml нужно указать правильный контекст
 
 # Установка Python зависимостей
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Копирование кода бота и необходимых зависимостей
-COPY telegram_bot.py .
-COPY config.py .
+COPY backend/telegram_bot.py telegram_bot.py
+COPY backend/config.py config.py
 
 # Команда запуска
 CMD ["python", "telegram_bot.py"]

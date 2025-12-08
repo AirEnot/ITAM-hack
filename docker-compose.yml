@@ -51,8 +51,8 @@ services:
 
   telegram-bot:
     build:
-      context: ./backend
-      dockerfile: Dockerfile.telegram
+      context: .
+      dockerfile: backend/Dockerfile.telegram
     container_name: itam-hack-telegram-bot
     depends_on:
       - backend

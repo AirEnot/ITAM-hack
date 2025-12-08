@@ -25,5 +25,4 @@ RUN mkdir -p /app/data
 EXPOSE 8000
 
 # Команда запуска с инициализацией БД
-#CMD ["sh", "-c", "python init_db.py && uvicorn main:app --host 0.0.0.0 --port 8000"]
-CMD ["sh", "-c", "python init_db.py && uvicorn main:app --host 0.0.0.0 --port 8000 && python add_admin.py && python telegram_bot.py"]
+CMD ["sh", "-c", "python init_db.py && python add_admin.py && uvicorn main:app --host 0.0.0.0 --port 8000"]
