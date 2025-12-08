@@ -310,11 +310,11 @@ async def apply_to_team(
             detail="You already have a pending invitation to this team"
         )
     
-    # Создаем приглашение от капитана к пользователю (как будто капитан пригласил)
+    # Создаем заявку: отправитель — сам пользователь (applicant)
     invitation = Invitation(
         team_id=team_id,
         user_id=current_user.id,
-        sent_by_id=team.captain_id
+        sent_by_id=current_user.id
     )
     
     db.add(invitation)

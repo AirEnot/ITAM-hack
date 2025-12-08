@@ -90,14 +90,32 @@ async def root():
 async def health():
     return {"status": "ok"}
 
-# Error handler
+# Error handler для необработанных исключений
 @app.exception_handler(Exception)
 async def global_exception_handler(request, exc):
-    logger.error(f"Error: {exc}")
-    return JSONResponse(
+    # HTTPException обрабатывается FastAPI автоматически с CORS заголовками
+    from fastapi import HTTPException
+    if isinstance(exc, HTTPException):
+        raise exc
+    
+    import traceback
+    logger.error(f"Unhandled error: {exc}")
+    logger.error(traceback.format_exc())
+    
+    # Возвращаем ответ с CORS заголовками
+    from fastapi.responses import JSONResponse
+    response = JSONResponse(
         status_code=500,
-        content={"detail": "Internal server error"}
+        content={"detail": str(exc) if str(exc) else "Internal server error"}
     )
+    # Добавляем CORS заголовки
+    origin = request.headers.get("origin")
+    if origin and origin in settings.get_allowed_origins():
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+        response.headers["Access-Control-Allow-Methods"] = "*"
+        response.headers["Access-Control-Allow-Headers"] = "*"
+    return response
 
 if __name__ == "__main__":
     import uvicorn

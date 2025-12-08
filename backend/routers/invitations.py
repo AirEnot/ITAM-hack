@@ -3,7 +3,7 @@ routers/invitations.py — управление приглашениями в к
 """
 from fastapi import APIRouter, Depends, HTTPException, status, Body
 from sqlalchemy.orm import Session, joinedload
-from sqlalchemy import and_
+from sqlalchemy import and_, or_, not_
 from database import get_db
 from models import Invitation, User, Team, UserHackathon, TeamMember, Hackathon
 from schemas import InvitationResponse, InvitationAcceptRequest
@@ -22,11 +22,11 @@ async def get_my_invitations(
     """Получить мои приглашения и результаты заявок"""
     from datetime import timedelta
     
-    # Получаем pending приглашения
+    # Получаем pending приглашения для пользователя
     pending_invitations = db.query(Invitation).options(
         joinedload(Invitation.team).joinedload(Team.members).joinedload(TeamMember.user),
         joinedload(Invitation.sent_by)
-    ).filter(
+    ).join(Team, Invitation.team_id == Team.id).filter(
         Invitation.user_id == current_user.id,
         Invitation.status == "pending"
     ).order_by(Invitation.created_at.desc()).all()
@@ -134,7 +134,9 @@ async def accept_invitation(
 ):
     """Принять или отклонить приглашение"""
     
-    invitation = db.query(Invitation).filter(Invitation.id == invitation_id).first()
+    invitation = db.query(Invitation).options(
+        joinedload(Invitation.team)
+    ).filter(Invitation.id == invitation_id).first()
     if not invitation:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -148,6 +150,16 @@ async def accept_invitation(
             detail="This invitation is not for you"
         )
     
+    # Определяем, это приглашение или заявка.
+    # Приглашение: отправитель — капитан команды (sent_by_id == captain_id).
+    # Заявка: отправитель — не капитан (sent_by_id != captain_id). Для заявок используется /approve|/reject.
+    team = invitation.team
+    if team and invitation.sent_by_id != team.captain_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="This is an application, not an invitation. Please wait for the captain's response."
+        )
+    
     # Проверяем что приглашение еще не обработано
     if invitation.status != "pending":
         raise HTTPException(
@@ -158,8 +170,7 @@ async def accept_invitation(
     if request.accept:
         # Принимаем приглашение
         try:
-            # Проверяем что команда еще открыта
-            team = db.query(Team).filter(Team.id == invitation.team_id).first()
+            # Используем уже загруженную команду
             if not team:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
@@ -312,8 +323,7 @@ async def get_my_team_applications(
     
     team_ids = [team.id for team in my_teams]
     
-    # Находим все приглашения для этих команд, где sent_by_id == captain_id (это заявки от пользователей)
-    # Когда пользователь подает заявку через /apply, создается Invitation где sent_by_id = captain_id
+    # Находим все заявки для этих команд, где отправитель не капитан (applicant подает заявку сам)
     invitations = db.query(Invitation).options(
         joinedload(Invitation.user),
         joinedload(Invitation.team).joinedload(Team.members).joinedload(TeamMember.user),
@@ -323,8 +333,8 @@ async def get_my_team_applications(
             Invitation.team_id.in_(team_ids),
             Invitation.status == "pending",
             Team.captain_id == current_user.id,
-            Invitation.sent_by_id == Team.captain_id,  # Заявки, созданные "от имени капитана" когда пользователь подал заявку
-            Invitation.user_id != Team.captain_id  # Исключаем приглашения самому себе
+            Invitation.sent_by_id != Team.captain_id,  # заявки подал не капитан
+            Invitation.user_id != Team.captain_id  # исключаем капитана как получателя
         )
     ).all()
     
@@ -428,100 +438,111 @@ async def approve_application(
     db: Session = Depends(get_db)
 ):
     """Принять заявку на вступление в команду (может только капитан)"""
-    
-    invitation = db.query(Invitation).filter(Invitation.id == invitation_id).first()
-    if not invitation:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Invitation not found"
-        )
-    
-    # Проверяем что это приглашение для команды, где пользователь является капитаном
-    team = db.query(Team).filter(Team.id == invitation.team_id).first()
-    if not team:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Team not found"
-        )
-    
-    if team.captain_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only team captain can approve applications"
-        )
-    
-    # Проверяем что приглашение еще не обработано
-    if invitation.status != "pending":
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Application already processed"
-        )
-    
-    # Проверяем что команда еще открыта
-    if team.status != "open":
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Team is no longer accepting members"
-        )
-    
-    # Проверяем максимальное количество участников
-    hackathon = db.query(Hackathon).filter(Hackathon.id == team.hackathon_id).first()
-    if hackathon:
-        current_members_count = db.query(TeamMember).filter(TeamMember.team_id == team.id).count()
-        if current_members_count >= hackathon.max_team_size:
+    try:
+        invitation = db.query(Invitation).filter(Invitation.id == invitation_id).first()
+        if not invitation:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Invitation not found"
+            )
+        
+        # Проверяем что это приглашение для команды, где пользователь является капитаном
+        team = db.query(Team).filter(Team.id == invitation.team_id).first()
+        if not team:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Team not found"
+            )
+        
+        if team.captain_id != current_user.id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Only team captain can approve applications"
+            )
+        
+        # Проверяем что приглашение еще не обработано
+        if invitation.status != "pending":
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Team is full. Maximum team size is {hackathon.max_team_size}"
+                detail="Application already processed"
             )
-    
-    # Проверяем, что пользователь зарегистрирован на хакатон
-    user_hackathon = db.query(UserHackathon).filter(
-        UserHackathon.user_id == invitation.user_id,
-        UserHackathon.hackathon_id == team.hackathon_id
-    ).first()
-    
-    if not user_hackathon:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="User must register for the hackathon first"
-        )
-    
-    # Проверяем, что пользователь не в другой команде
-    if user_hackathon.team_id and user_hackathon.team_id != team.id:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="User is already in another team for this hackathon"
-        )
-    
-    # Проверяем, что пользователь еще не в этой команде
-    from models import TeamMember
-    existing_member = db.query(TeamMember).filter(
-        TeamMember.team_id == invitation.team_id,
-        TeamMember.user_id == invitation.user_id
-    ).first()
-    
-    if existing_member:
-        # Пользователь уже в команде, просто обновляем статус приглашения
-        invitation.status = "accepted"
-        invitation.responded_at = datetime.utcnow()
-    else:
-        # Добавляем пользователя в команду
-        team_member = TeamMember(
-            team_id=invitation.team_id,
-            user_id=invitation.user_id
-        )
-        db.add(team_member)
         
-        # Обновляем регистрацию пользователя на хакатон
-        user_hackathon.team_id = team.id
+        # Проверяем что команда еще открыта
+        if team.status != "open":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Team is no longer accepting members"
+            )
         
-        # Обновляем приглашение
-        invitation.status = "accepted"
-        invitation.responded_at = datetime.utcnow()
-    
-    db.commit()
-    
-    return {"message": "Application approved", "invitation_id": invitation_id}
+        # Проверяем максимальное количество участников
+        hackathon = db.query(Hackathon).filter(Hackathon.id == team.hackathon_id).first()
+        if hackathon:
+            current_members_count = db.query(TeamMember).filter(TeamMember.team_id == team.id).count()
+            if current_members_count >= hackathon.max_team_size:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Team is full. Maximum team size is {hackathon.max_team_size}"
+                )
+        
+        # Проверяем, что пользователь зарегистрирован на хакатон
+        user_hackathon = db.query(UserHackathon).filter(
+            UserHackathon.user_id == invitation.user_id,
+            UserHackathon.hackathon_id == team.hackathon_id
+        ).first()
+        
+        if not user_hackathon:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="User must register for the hackathon first"
+            )
+        
+        # Проверяем, что пользователь не в другой команде
+        if user_hackathon.team_id and user_hackathon.team_id != team.id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="User is already in another team for this hackathon"
+            )
+        
+        # Проверяем, что пользователь еще не в этой команде
+        existing_member = db.query(TeamMember).filter(
+            TeamMember.team_id == invitation.team_id,
+            TeamMember.user_id == invitation.user_id
+        ).first()
+        
+        if existing_member:
+            # Пользователь уже в команде, просто обновляем статус приглашения
+            invitation.status = "accepted"
+            invitation.responded_at = datetime.utcnow()
+        else:
+            # Добавляем пользователя в команду
+            team_member = TeamMember(
+                team_id=invitation.team_id,
+                user_id=invitation.user_id
+            )
+            db.add(team_member)
+            
+            # Обновляем регистрацию пользователя на хакатон
+            user_hackathon.team_id = team.id
+            
+            # Обновляем приглашение
+            invitation.status = "accepted"
+            invitation.responded_at = datetime.utcnow()
+        
+        db.commit()
+        
+        return {"message": "Application approved", "invitation_id": invitation_id}
+    except HTTPException:
+        # Пробрасываем HTTP ошибки как есть
+        raise
+    except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error approving application {invitation_id}: {str(e)}", exc_info=True)
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error approving application: {str(e)}"
+        )
 
 
 @router.post("/{invitation_id}/reject")

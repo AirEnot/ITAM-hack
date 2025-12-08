@@ -96,19 +96,13 @@ onMounted(loadHackathon);
       <div v-if="isRegistered && hackathon.status === 'upcoming'" class="registration-status">
         <p class="registered-message">✅ Вы зарегистрированы на этот хакатон</p>
       </div>
-      <button v-else @click="register" :disabled="registering" class="btn-register">
+      <button v-else-if="hackathon.status === 'upcoming'" @click="register" :disabled="registering" class="btn-register">
         {{ registering ? 'Регистрация...' : 'Зарегистрироваться' }}
       </button>
       <div v-if="hackathon" class="teams-section">
-        <!-- Если статус active/finished — запрещаем создание команды -->
-        <div v-if="hackathon.status === 'active'" class="cannot-create-banner">
-          <p>Хакатон уже начался, создание команды невозможно.</p>
-        </div>
-        <div v-if="hackathon.status === 'finished'" class="cannot-create-banner">
-          <p>Хакатон завершен</p>
-        </div>
+        <!-- Форма создания команды показывается только для зарегистрированных пользователей на upcoming хакатонах -->
         <CreateTeamForm
-          v-else
+          v-if="hackathon.status === 'upcoming' && isRegistered"
           :hackathon-id="hackathonIdNum"
           @team-created="handleTeamCreated"
         />

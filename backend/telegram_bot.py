@@ -3,12 +3,14 @@ import requests
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, ContextTypes
 from dotenv import load_dotenv
+from config import get_settings
 
 load_dotenv()
+settings = get_settings()
 
-TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-BACKEND_URL = os.getenv("BACKEND_URL")
-FRONTEND_URL = os.getenv("FRONTEND_URL")
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN") or settings.TELEGRAM_BOT_TOKEN
+BACKEND_URL = os.getenv("BACKEND_URL") or settings.BACKEND_URL
+FRONTEND_URL = os.getenv("FRONTEND_URL") or settings.FRONTEND_URL
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):

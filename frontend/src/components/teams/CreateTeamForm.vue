@@ -105,7 +105,7 @@ onMounted(() => {
     >
       Создать команду
     </button>
-    <div v-else-if="canCreate === false && !showForm" class="cannot-create">
+    <div v-else-if="canCreate === false && !showForm && canCreateError && !canCreateError.toLowerCase().includes('you must register')" class="cannot-create">
       <p>{{ canCreateError || 'Вы не можете создать команду для этого хакатона' }}</p>
     </div>
     

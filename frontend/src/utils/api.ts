@@ -5,7 +5,11 @@ import { COOKIE_NAMES } from '../config';
 // В development Vite proxy обрабатывает /api запросы
 // В production nginx проксирует /api к backend
 // Переменная VITE_API_BASE_URL может быть установлена для переопределения (обычно пустая строка)
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || import.meta.env.BACKEND_URL || '';
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ||
+  import.meta.env.VITE_BACKEND_URL ||
+  import.meta.env.BACKEND_URL ||
+  'http://localhost:8000';
 
 // Создаем базовый экземпляр axios
 const apiClient: AxiosInstance = axios.create({
@@ -87,7 +91,7 @@ adminApiClient.interceptors.response.use(
   }
 );
 
-// Экспортируем клиенты
-export { apiClient, adminApiClient };
+// Экспортируем клиенты и базовый URL
+export { apiClient, adminApiClient, API_BASE_URL };
 export default apiClient;
 

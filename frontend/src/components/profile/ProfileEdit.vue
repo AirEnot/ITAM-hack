@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import apiClient from '../../utils/api';
+
+const router = useRouter();
 
 const form = ref({
   full_name: '',
@@ -49,7 +52,8 @@ async function save() {
   error.value = '';
   try {
     await apiClient.put('/api/users/me', form.value);
-    alert('Профиль обновлен!');
+    // Перенаправляем на страницу профиля после успешного сохранения
+    router.push('/profile');
   } catch (e: any) {
     error.value = e?.response?.data?.detail || e?.message || 'Ошибка';
   } finally {

@@ -6,6 +6,7 @@ export default defineConfig(({ mode }) => {
   // Третий аргумент '' означает, что мы грузим все переменные,
   // либо можно оставить пустым, чтобы грузить только с префиксом VITE_
   const env = loadEnv(mode, process.cwd(), '')
+  const backendTarget = env.VITE_BACKEND_URL || env.BACKEND_URL || 'http://localhost:8000'
 
   return {
     plugins: [vue()],
@@ -14,8 +15,8 @@ export default defineConfig(({ mode }) => {
       open: true,
       proxy: {
         '/api': {
-          // Теперь обращаемся к env объекту, который мы загрузили
-          target: env.BACKEND_URL, 
+          // Используем адрес backend из env
+          target: backendTarget, 
           changeOrigin: true,
           secure: false,
         },

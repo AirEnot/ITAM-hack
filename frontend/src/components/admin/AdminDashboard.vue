@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { adminApiClient } from '../../utils/api';
+import { adminApiClient, API_BASE_URL } from '../../utils/api';
 
 const hackathons = ref<any[]>([]);
 const loading = ref(true);
@@ -87,8 +87,8 @@ onMounted(fetchHackathons);
               <button @click="fetchAnalytics(h.id)">Аналитика</button>
             </td>
             <td style="btns">
-              <button @click="downloadCSV(`http://localhost:8000/api/admin/${h.id}/participants/export`, `participants_${h.id}.csv`)">Участники CSV</button><br>
-              <button @click="downloadCSV(`http://localhost:8000/api/admin/${h.id}/teams/export`, `teams_${h.id}.csv`)">Команды CSV</button>
+              <button @click="downloadCSV(`${API_BASE_URL}/api/admin/${h.id}/participants/export`, `participants_${h.id}.csv`)">Участники CSV</button><br>
+              <button @click="downloadCSV(`${API_BASE_URL}/api/admin/${h.id}/teams/export`, `teams_${h.id}.csv`)">Команды CSV</button>
             </td>
           </tr>
         </tbody>
