@@ -126,7 +126,8 @@ python -m venv venv
 
 # 2. Активировать
 # Windows:
-venv\Scripts\activate
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope
+.venv\Scripts\Activate.ps1
 # Linux/Mac:
 source venv/bin/activate
 
@@ -397,13 +398,7 @@ pip install -r requirements.txt
 - **Быстрый старт**: [QUICKSTART.md](./QUICKSTART.md)
 - **Docker Setup**: [DOCKER_SETUP.md](./DOCKER_SETUP.md)
 - **Установка**: [INSTALLATION.md](./INSTALLATION.md)
-- **API Docs**: http://localhost:8000/docs (после запуска)
-
----
-
-## 📝 Лицензия
-
-MIT License
+- **API Docs**: BACKEND_URL/docs (после запуска)
 
 ---
 
@@ -412,5 +407,3 @@ MIT License
 Создано командой **BDC** для ITAM Hackathon Community
 
 ---
-
-**Удачи с хакатоном! 🚀**
