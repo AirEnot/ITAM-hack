@@ -16,7 +16,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="home-welcome-text">
+  <div class="home-hero glass-panel floating">
     <h1>ITAM Hack Platform</h1>
     <p>Веб-платформа для поиска, создания и управления командами для хакатонов.</p>
     
@@ -38,49 +38,38 @@ onMounted(() => {
 </template>
 
 <style scoped lang="css">
-.home-welcome-text {
+.home-hero {
+  position: relative;
   text-align: center;
-  padding: 2rem 1rem 2rem 1rem;
+  padding: 2.4rem 1.2rem 2.6rem 1.2rem;
+  overflow: hidden;
 }
-.home-welcome-text h1 {
-  font-size: 1.8rem;
+.home-hero::after {
+  content: '';
+  position: absolute;
+  width: 480px;
+  height: 480px;
+  background: radial-gradient(circle, rgba(125, 226, 255, 0.2), transparent 55%);
+  top: -280px;
+  right: -260px;
+  filter: blur(18px);
+  pointer-events: none;
+  z-index: 0;
+}
+.home-hero h1 {
+  font-size: 2.1rem;
   font-weight: bold;
   letter-spacing: 1.5px;
   margin-bottom: 1rem;
-  color: #70bfff;
+  color: #f5f8ff;
+  text-shadow: 0 10px 32px rgba(0, 0, 0, 0.35);
 }
-.home-welcome-text ul {
-  margin: 2.2rem auto 1rem auto;
-  padding: 0;
-  list-style: none;
-  max-width: 400px;
+.home-hero p {
+  color: var(--muted);
+  max-width: 520px;
+  margin: 0.2rem auto 0 auto;
+  font-size: 1rem;
 }
-.home-welcome-text li {
-  margin-bottom: 1rem;
-}
-.home-welcome-text a {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-  color: #fff;
-  padding: 0.85rem 1.8rem;
-  background: linear-gradient(135deg, #3ca0fa 0%, #2d7dd2 100%);
-  border-radius: 10px;
-  font-size: 1.05rem;
-  font-weight: 600;
-  text-decoration: none;
-  transition: all 0.2s;
-  box-shadow: 0 4px 15px rgba(60, 160, 250, 0.3);
-  width: 100%;
-}
-.home-welcome-text a:hover {
-  background: linear-gradient(135deg, #4ab0ff 0%, #3d8de2 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(60, 160, 250, 0.4);
-  color: #fff;
-}
-
 .auth-section {
   margin: 2.5rem 0;
   display: flex;
@@ -94,31 +83,34 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
-  padding: 0.85rem 1.8rem;
-  background: linear-gradient(135deg, #3ca0fa 0%, #2d7dd2 100%);
+  padding: 0.9rem 1.9rem;
+  background: linear-gradient(135deg, #7de2ff 0%, #7c63ff 45%, #53f3c5 100%);
   color: #fff;
-  border-radius: 10px;
+  border-radius: 14px;
   font-size: 1.05rem;
   font-weight: 600;
   text-decoration: none;
   transition: all 0.2s;
-  box-shadow: 0 4px 15px rgba(60, 160, 250, 0.3);
+  box-shadow: 0 16px 40px rgba(124, 99, 255, 0.25), 0 10px 24px rgba(0, 0, 0, 0.35);
   width: 100%;
   max-width: 400px;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
 }
 .auth-button:hover {
-  background: linear-gradient(135deg, #4ab0ff 0%, #3d8de2 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(60, 160, 250, 0.4);
+  background: linear-gradient(135deg, #8de8ff 0%, #8b79ff 40%, #66f4cf 100%);
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 0 20px 50px rgba(124, 99, 255, 0.32), 0 12px 26px rgba(0, 0, 0, 0.38);
   color: #fff;
 }
 .auth-button.admin-button {
-  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+  background: linear-gradient(145deg, #7c63ff 0%, #9a6bff 45%, #ff7de2 100%);
+  box-shadow: 0 16px 40px rgba(139, 92, 246, 0.28), 0 10px 24px rgba(0, 0, 0, 0.35);
 }
 .auth-button.admin-button:hover {
-  background: linear-gradient(135deg, #9d6ff7 0%, #8d4ff0 100%);
-  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+  background: linear-gradient(145deg, #8b79ff 0%, #a478ff 50%, #ff8de6 100%);
+  box-shadow: 0 20px 50px rgba(139, 92, 246, 0.35), 0 12px 26px rgba(0, 0, 0, 0.38);
 }
 
 .auth-icon {
@@ -126,13 +118,14 @@ onMounted(() => {
 }
 
 @media (min-width: 640px) {
-  .home-welcome-text {
-    padding: 3rem 0 2rem 0;
+  .home-hero {
+    padding: 3rem 2rem 2.4rem 2rem;
   }
-  .home-welcome-text h1 {
-    font-size: 2.1rem;
+  .home-hero h1 {
+    font-size: 2.4rem;
     letter-spacing: 2.1px;
     margin-bottom: 1.2rem;
   }
 }
+
 </style>

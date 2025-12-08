@@ -92,7 +92,7 @@ onMounted(() => {
 
 <template>
   <div class="app-layout">
-    <header class="main-header">
+    <header class="main-header glass-panel">
       <div class="container">
         <router-link to="/" class="logo">ITAM HACK</router-link>
         <nav v-if="showNav" class="main-nav">
@@ -110,14 +110,26 @@ onMounted(() => {
       <router-view />
     </main>
     <!-- Мобильная навигация -->
-    <nav v-if="showNav" class="mobile-nav">
-      <router-link to="/hackathons">🏆<span>Хакатоны</span></router-link>
-      <router-link to="/team">👥<span>Мои команды</span></router-link>
+    <nav v-if="showNav" class="mobile-nav glass-liquid">
+      <router-link to="/hackathons">
+        <span class="nav-emoji">🏆</span>
+        <span>Хакатоны</span>
+      </router-link>
+      <router-link to="/team">
+        <span class="nav-emoji">👥</span>
+        <span>Мои команды</span>
+      </router-link>
       <router-link to="/invitations" class="invitations-link-mobile">
-        💌<span>Уведомления</span>
+        <span class="nav-emoji">💌</span>
+        <span>Уведомления</span>
         <span v-if="pendingInvitationsCount > 0" class="invitations-badge-mobile">{{ pendingInvitationsCount }}</span>
       </router-link>
-      <router-link to="/profile">👤<span>Профиль</span></router-link>
+      <router-link to="/profile">
+        <span class="nav-emoji">👤</span>
+        <span>Профиль</span>
+      </router-link>
+      <div class="glass-blob"></div>
+      <div class="glass-blob alt"></div>
     </nav>
   </div>
 </template>
@@ -127,21 +139,28 @@ onMounted(() => {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: #18191c;
-  color: #ededed;
+  background: linear-gradient(160deg, rgba(9, 12, 24, 0.8), rgba(6, 8, 14, 0.9));
+  color: var(--text);
 }
 
 .main-header {
-  background: #24244b;
-  padding: 0.3rem 0;
+  background: linear-gradient(140deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.04));
+  border-bottom: 1px solid var(--border);
+  padding: 0.45rem 0;
+  backdrop-filter: blur(var(--blur-strong));
+  -webkit-backdrop-filter: blur(var(--blur-strong));
+  position: sticky;
+  top: 0;
+  z-index: 20;
 }
 
 .logo {
   font-weight: bold;
-  font-size: 1.3rem;
-  letter-spacing: 1.5px;
-  color: #60b7ff;
+  font-size: 1.25rem;
+  letter-spacing: 1.8px;
+  color: #9ae7ff;
   margin-right: 2rem;
+  text-shadow: 0 6px 18px rgba(122, 226, 255, 0.4);
 }
 
 .main-header .container {
@@ -153,27 +172,29 @@ onMounted(() => {
   justify-content: space-between;
 }
 .logo {
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   margin-right: 1rem;
 }
 .main-nav {
   display: none;
+  gap: 1.5rem;
 }
 .main-nav a {
-  margin-left: 2rem;
-  color: #ededed;
+  color: var(--text);
   text-decoration: none;
-  font-size: 1.05rem;
+  font-size: 1rem;
   position: relative;
+  padding: 0.5rem 0.25rem;
+  transition: color 0.2s ease;
 }
 .main-nav a.router-link-active {
-  color: #60b7ff;
+  color: #7de2ff;
 }
 .main-nav a::after {
   content: '';
   display: block;
   width: 0; height: 2px;
-  background: #60b7ff;
+  background: linear-gradient(90deg, #7de2ff, #7c63ff);
   transition: width .3s;
   position: absolute;
   left: 0; bottom: -3px;
@@ -202,6 +223,7 @@ onMounted(() => {
   font-size: 0.7rem;
   font-weight: bold;
   line-height: 1;
+  box-shadow: 0 0 0 4px rgba(255, 107, 107, 0.15);
 }
 
 .invitations-link-mobile {
@@ -224,6 +246,7 @@ onMounted(() => {
   font-weight: bold;
   padding: 0 4px;
   line-height: 1;
+  box-shadow: 0 0 0 4px rgba(255, 107, 107, 0.18);
 }
 
 .main-content {
@@ -244,31 +267,63 @@ onMounted(() => {
 .mobile-nav {
   display: flex;
   position: fixed;
-  left: 0; bottom: 0; width: 100vw;
-  background: #23233c;
-  border-top: 1px solid #33334c;
+  left: 0; bottom: 16px; width: calc(100vw - 24px);
+  margin: 0 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
   justify-content: space-around;
-  padding: 0.3rem 0 0.1rem 0;
+  padding: 0.55rem 0.2rem 0.5rem 0.2rem;
   z-index: 31;
+  border-radius: 22px;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+  overflow: hidden;
 }
 .mobile-nav a {
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  font-size: 1.25rem;
-  color: #ededed;
+  gap: 0.1rem;
+  font-size: 1.05rem;
+  color: var(--text);
   text-decoration: none;
-  padding: 0.3rem 0.1rem;
-  transition: background 0.15s;
+  padding: 0.45rem 0.1rem;
+  transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease;
+  position: relative;
 }
 .mobile-nav a span {
   font-size: 0.72rem;
 }
 .mobile-nav a:hover,
 .mobile-nav a.router-link-active {
-  background: #252553;
-  color: #60b7ff;
+  background: rgba(255, 255, 255, 0.08);
+  color: #7de2ff;
+  transform: translateY(-1px);
+}
+.mobile-nav .nav-emoji {
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.35));
+}
+.glass-blob {
+  position: absolute;
+  width: 140px;
+  height: 140px;
+  background: radial-gradient(circle, rgba(125, 226, 255, 0.3), rgba(124, 99, 255, 0));
+  filter: blur(26px);
+  opacity: 0.8;
+  right: -20px;
+  bottom: -60px;
+  pointer-events: none;
+  animation: floaty 8s ease-in-out infinite;
+}
+.glass-blob.alt {
+  width: 120px;
+  height: 120px;
+  left: -30px;
+  top: -60px;
+  background: radial-gradient(circle, rgba(83, 243, 197, 0.3), rgba(124, 99, 255, 0));
+  animation-duration: 9s;
 }
 @media (min-width: 768px) {
   .main-header .container {

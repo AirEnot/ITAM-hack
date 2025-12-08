@@ -29,14 +29,14 @@ onMounted(loadMyTeams);
     <div v-else-if="error" class="error">{{ error }}</div>
     <div v-else-if="teams.length === 0" class="empty">
       <p>Вы пока не состоите ни в одной команде.</p>
-      <router-link to="/hackathons" class="btn-find">Найти хакатон</router-link>
+      <router-link to="/hackathons" class="btn-find btn-primary">Найти хакатон</router-link>
     </div>
     <div v-else class="teams-list">
       <div v-for="team in teams" :key="team.id" class="team-card">
         <h3>{{ team.name }}</h3>
         <p v-if="team.description">{{ team.description }}</p>
         <p class="hackathon-name">Хакатон: {{ team.hackathon_name }}</p>
-        <router-link :to="`/teams/${team.id}`" class="btn-view">Подробнее</router-link>
+        <router-link :to="`/teams/${team.id}`" class="btn-view btn-primary">Подробнее</router-link>
       </div>
     </div>
   </div>
@@ -82,24 +82,10 @@ onMounted(loadMyTeams);
   color: #b8b8d4;
 }
 
-.btn-find {
-  display: inline-block;
-  margin-top: 1rem;
-  padding: 0.8rem 2rem;
-  background: #0987c7;
-  border-radius: 6px;
-  color: #fff;
-  text-decoration: none;
-}
-
+.btn-find,
 .btn-view {
   display: inline-block;
   margin-top: 1rem;
-  padding: 0.6rem 1.4rem;
-  background: #0987c7;
-  color: #fff;
-  text-decoration: none;
-  border-radius: 6px;
 }
 
 .error {

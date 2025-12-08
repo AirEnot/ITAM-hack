@@ -6,11 +6,27 @@
 }
 
 :root {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   line-height: 1.5;
   font-weight: 400;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  --bg-main: #04050a;
+  --bg-alt: #0b0d18;
+  --glass: rgba(255, 255, 255, 0.05);
+  --glass-strong: rgba(255, 255, 255, 0.12);
+  --border: rgba(255, 255, 255, 0.14);
+  --text: #f3f6ff;
+  --muted: #9ea7c7;
+  --accent: #7de2ff;
+  --accent-2: #9c7cff;
+  --accent-3: #5cf3c5;
+  --radius-lg: 18px;
+  --radius-sm: 12px;
+  --shadow-strong: 0 20px 60px rgba(0, 0, 0, 0.4);
+  --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.25);
+  --blur-strong: 18px;
+  --blur-soft: 12px;
 }
 
 html {
@@ -20,14 +36,34 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
-  background: #0f0f1a;
-  color: #ececec;
+  background: radial-gradient(circle at 20% 20%, rgba(124, 92, 255, 0.14), transparent 36%),
+              radial-gradient(circle at 75% 0%, rgba(46, 196, 255, 0.16), transparent 32%),
+              linear-gradient(145deg, #05060c 0%, #0c0e1a 40%, #05060c 100%);
+  color: var(--text);
   overflow-x: hidden;
+  position: relative;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at 80% 30%, rgba(255, 255, 255, 0.06), transparent 22%),
+              radial-gradient(circle at 20% 70%, rgba(125, 226, 255, 0.08), transparent 30%);
+  filter: blur(70px);
+  opacity: 0.6;
+}
+
+main {
+  position: relative;
+  z-index: 1;
 }
 
 /* Адаптивная типографика */
 h1, h2, h3, h4, h5, h6 {
   line-height: 1.2;
+  color: var(--text);
 }
 
 /* Адаптивные изображения */
@@ -43,6 +79,185 @@ input,
 select,
 textarea {
   -webkit-tap-highlight-color: transparent;
+}
+
+/* Общие стеклянные поверхности */
+.glass-panel {
+  background: var(--glass);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(var(--blur-soft));
+  -webkit-backdrop-filter: blur(var(--blur-soft));
+  border-radius: var(--radius-lg);
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-panel > * {
+  position: relative;
+  z-index: 1;
+}
+
+.glass-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.glass-panel:hover::before {
+  opacity: 1;
+}
+
+.floating {
+  animation: floaty 6s ease-in-out infinite;
+}
+
+.glow-accent {
+  box-shadow: 0 10px 30px rgba(125, 226, 255, 0.25);
+}
+
+/* Кнопки нового стиля - единые для кнопок и ссылок */
+button:not([class*="router"]),
+.btn,
+.btn-primary,
+.btn-ghost,
+.btn-view,
+.auth-button,
+a.btn,
+a.btn-primary,
+a.btn-ghost,
+a.btn-view,
+a.auth-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  font-family: inherit;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  border: none;
+  cursor: pointer;
+  border-radius: 14px;
+  padding: 0.9rem 1.25rem;
+  transition: transform 0.2s ease, box-shadow 0.25s ease, background 0.2s ease;
+  position: relative;
+  isolation: isolate;
+  text-decoration: none;
+  line-height: 1.15;
+  min-height: 44px;
+}
+
+.btn-primary,
+.btn-view,
+.auth-button,
+button:not([class*="router"]),
+input[type="submit"],
+input[type="button"] {
+  background: linear-gradient(135deg, #7de2ff 0%, #7c63ff 50%, #53f3c5 100%);
+  color: #04101a;
+  box-shadow: 0 10px 30px rgba(124, 99, 255, 0.25), 0 8px 18px rgba(0, 0, 0, 0.3);
+}
+
+.btn-ghost {
+  background: var(--glass-strong);
+  color: var(--text);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.btn::after,
+.btn-primary::after,
+.btn-ghost::after,
+.btn-view::after,
+.auth-button::after,
+button:not([class*="router"])::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.22), transparent 45%);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.btn:hover,
+.btn-primary:hover,
+.btn-ghost:hover,
+.btn-view:hover,
+.auth-button:hover,
+button:not([class*="router"]):hover {
+  transform: translateY(-2px);
+}
+
+.btn:hover::after,
+.btn-primary:hover::after,
+.btn-ghost:hover::after,
+.btn-view:hover::after,
+.auth-button:hover::after,
+button:not([class*="router"]):hover::after {
+  opacity: 1;
+}
+
+.btn:active,
+.btn-primary:active,
+.btn-ghost:active,
+.btn-view:active,
+.auth-button:active,
+button:not([class*="router"]):active {
+  transform: translateY(0);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+}
+
+/* Унифицированные стили статусов хакатонов */
+.status {
+  padding: 0.3rem 0.8rem;
+  border-radius: 999px;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-weight: 600;
+}
+
+.status.upcoming {
+  background: linear-gradient(135deg, rgba(124, 99, 255, 0.25), rgba(125, 226, 255, 0.22));
+  color: #cbe6ff;
+}
+
+.status.active {
+  background: linear-gradient(135deg, rgba(83, 243, 197, 0.25), rgba(124, 99, 255, 0.18));
+  color: #e3fff4;
+}
+
+.status.finished {
+  background: linear-gradient(135deg, rgba(255, 125, 226, 0.2), rgba(124, 99, 255, 0.14));
+  color: #f1e8ff;
+}
+
+/* Карточки и списки */
+.card-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 1024px) {
+  .card-grid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+}
+
+/* Анимации */
+@keyframes floaty {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+  100% { transform: translateY(0); }
 }
 
 /* Улучшение скролла на мобильных */

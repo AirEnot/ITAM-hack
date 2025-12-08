@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, defineProps, defineEmits } from 'vue';
+import { ref, onMounted, onUnmounted, defineProps, defineEmits } from 'vue';
 import { adminApiClient } from '../../utils/api';
 
 const props = defineProps<{
@@ -24,6 +24,27 @@ const form = ref({
 const loading = ref(false);
 const error = ref('');
 const validationErrors = ref<Record<string, string>>({});
+
+// Состояние для кастомного dropdown статуса
+const statusDropdownOpen = ref(false);
+const availableStatuses = [
+  { value: 'upcoming', label: 'Предстоящий' },
+  { value: 'active', label: 'Активный' },
+  { value: 'finished', label: 'Завершен' }
+];
+
+function selectStatus(status: string) {
+  form.value.status = status;
+  statusDropdownOpen.value = false;
+}
+
+// Закрываем dropdown при клике вне его
+function handleClickOutside(event: MouseEvent) {
+  const target = event.target as HTMLElement;
+  if (!target.closest('.dropdown-wrapper')) {
+    statusDropdownOpen.value = false;
+  }
+}
 
 function formatDateTimeForInput(dateStr: string): string {
   if (!dateStr) return '';
@@ -118,6 +139,11 @@ onMounted(() => {
   if (props.mode === 'edit') {
     loadHackathon();
   }
+  document.addEventListener('click', handleClickOutside);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside);
 });
 </script>
 
@@ -153,13 +179,25 @@ onMounted(() => {
           <input v-model.number="form.max_team_size" type="number" min="1" />
           <span v-if="validationErrors.max_team_size" class="error-text">{{ validationErrors.max_team_size }}</span>
         </div>
-        <div v-if="props.mode === 'edit'" class="form-group">
+        <div v-if="props.mode === 'edit'" class="form-group dropdown-wrapper">
           <label>Статус</label>
-          <select v-model="form.status">
-            <option value="upcoming">Предстоящий</option>
-            <option value="active">Активный</option>
-            <option value="finished">Завершен</option>
-          </select>
+          <div class="custom-dropdown" @click.stop="statusDropdownOpen = !statusDropdownOpen">
+            <span class="dropdown-value">{{ availableStatuses.find(s => s.value === form.status)?.label || 'Выберите статус' }}</span>
+            <svg class="dropdown-arrow" :class="{ open: statusDropdownOpen }" width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path d="M6 9L1 4h10L6 9z" fill="currentColor"/>
+            </svg>
+          </div>
+          <div v-if="statusDropdownOpen" class="dropdown-menu">
+            <div 
+              v-for="status in availableStatuses" 
+              :key="status.value" 
+              class="dropdown-option" 
+              :class="{ active: form.status === status.value }"
+              @click="selectStatus(status.value)"
+            >
+              {{ status.label }}
+            </div>
+          </div>
         </div>
       </div>
       <div v-if="error" class="error-message">{{ error }}</div>
@@ -196,21 +234,162 @@ onMounted(() => {
   color: #b8b8d4;
 }
 .form-group input,
-.form-group textarea,
-.form-group select {
+.form-group textarea {
   width: 100%;
-  padding: 0.7rem;
-  background: #2a2a3e;
-  border: 1px solid #3a3a4e;
-  border-radius: 6px;
-  color: #ececec;
-  font-size: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  color: var(--text);
+  font-size: 0.95rem;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
+
+.form-group input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
 .form-group input:focus,
-.form-group textarea:focus,
-.form-group select:focus {
+.form-group textarea:focus {
   outline: none;
-  border-color: #4cc5fc;
+  border-color: rgba(125, 226, 255, 0.5);
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 6px 20px rgba(125, 226, 255, 0.2), 0 0 0 3px rgba(125, 226, 255, 0.1);
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.dropdown-wrapper {
+  position: relative;
+}
+
+.custom-dropdown {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  padding-right: 2.5rem;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  color: var(--text);
+  font-size: 0.95rem;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+}
+
+.custom-dropdown:hover {
+  border-color: rgba(125, 226, 255, 0.4);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dropdown-value {
+  flex: 1;
+  color: var(--text);
+}
+
+.dropdown-arrow {
+  position: absolute;
+  right: 0.75rem;
+  color: rgba(255, 255, 255, 0.7);
+  transition: transform 0.2s ease;
+  pointer-events: none;
+}
+
+.dropdown-arrow.open {
+  transform: rotate(180deg);
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: rgba(5, 6, 12, 0.85);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 14px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: 300px;
+  animation: dropdownFadeIn 0.2s ease;
+}
+
+/* Стилизация скроллбара для dropdown */
+.dropdown-menu::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dropdown-menu::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+
+.dropdown-menu::-webkit-scrollbar-thumb {
+  background: rgba(125, 226, 255, 0.4);
+  border-radius: 10px;
+  transition: background 0.2s ease;
+}
+
+.dropdown-menu::-webkit-scrollbar-thumb:hover {
+  background: rgba(125, 226, 255, 0.6);
+}
+
+/* Для Firefox */
+.dropdown-menu {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(125, 226, 255, 0.4) rgba(255, 255, 255, 0.05);
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdown-option {
+  padding: 0.75rem 1rem;
+  color: var(--text);
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.dropdown-option:last-child {
+  border-bottom: none;
+}
+
+.dropdown-option:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #7de2ff;
+}
+
+.dropdown-option.active {
+  background: linear-gradient(135deg, rgba(125, 226, 255, 0.2), rgba(124, 99, 255, 0.15));
+  color: #7de2ff;
+  font-weight: 600;
 }
 
 .form-row {

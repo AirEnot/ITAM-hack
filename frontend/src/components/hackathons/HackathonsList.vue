@@ -25,11 +25,17 @@ onMounted(loadHackathons);
 
 <template>
   <div class="hackathons-list">
-    <h1>Хакатоны</h1>
-    <div v-if="loading">Загрузка...</div>
-    <div v-else-if="error" class="error">{{ error }}</div>
-    <div v-else-if="hackathons.length === 0" class="empty">Нет доступных хакатонов</div>
-    <div v-else class="cards-grid">
+    <div class="list-head">
+      <div>
+        <p class="eyebrow">Мероприятия</p>
+        <h1>Хакатоны</h1>
+      </div>
+      <div class="glow-dot"></div>
+    </div>
+    <div v-if="loading" class="loading">Загрузка...</div>
+    <div v-else-if="error" class="error glass-panel">{{ error }}</div>
+    <div v-else-if="hackathons.length === 0" class="empty glass-panel">Нет доступных хакатонов</div>
+    <div v-else class="cards-grid card-grid">
       <HackathonsCard v-for="hackathon in hackathons" :key="hackathon.id" :hackathon="hackathon" />
     </div>
   </div>
@@ -41,29 +47,55 @@ onMounted(loadHackathons);
   width: 100%;
   margin: 0 auto;
 }
-.hackathons-list h1 {
-  color: #4cc5fc;
+.list-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 1.5rem;
-  font-size: 1.5rem;
+  position: relative;
 }
-
+.eyebrow {
+  color: var(--muted);
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.hackathons-list h1 {
+  color: #f7f9ff;
+  margin: 0.35rem 0 0 0;
+  font-size: 1.9rem;
+  letter-spacing: 0.04em;
+}
+.glow-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #7de2ff 0%, #7c63ff 60%, rgba(124, 99, 255, 0) 80%);
+  box-shadow: 0 0 18px rgba(125, 226, 255, 0.5);
+  animation: pulse 3.2s ease-in-out infinite;
+}
 .cards-grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 1rem;
 }
-
 .error {
-  color: #ff6b6b;
+  color: #ffb4b4;
   text-align: center;
-  padding: 1.5rem;
-  font-size: 0.9rem;
+  padding: 1.5rem 1.2rem;
+  font-size: 1rem;
+  border: 1px solid rgba(255, 107, 107, 0.35);
 }
 
 .empty {
   text-align: center;
-  color: #888;
+  color: var(--muted);
   padding: 2rem 1rem;
+}
+
+.loading {
+  padding: 1.5rem 1rem;
+  color: var(--muted);
 }
 
 @media (min-width: 1024px) {
@@ -74,8 +106,8 @@ onMounted(loadHackathons);
 
 @media (min-width: 640px) {
   .hackathons-list h1 {
-    font-size: 2rem;
-    margin-bottom: 2rem;
+    font-size: 2.2rem;
+    margin-bottom: 1rem;
   }
   .cards-grid {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -87,6 +119,12 @@ onMounted(loadHackathons);
   .empty {
     padding: 3rem;
   }
+}
+
+@keyframes pulse {
+  0% { transform: scale(0.95); opacity: 0.9; }
+  50% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(0.95); opacity: 0.9; }
 }
 </style>
 

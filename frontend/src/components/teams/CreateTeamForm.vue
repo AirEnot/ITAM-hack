@@ -22,6 +22,15 @@ const canCreateError = ref('');
 const canCreate = ref<boolean | null>(null);
 const checking = ref(false);
 
+// Проверяем, есть ли уже созданная команда
+const hasExistingTeam = computed(() => {
+  if (canCreate.value === false && canCreateError.value) {
+    const errorLower = canCreateError.value.toLowerCase();
+    return errorLower.includes('already created') || errorLower.includes('one user can create only one team');
+  }
+  return false;
+});
+
 // Преобразуем hackathonId в число
 const hackathonIdNum = computed(() => {
   const id = typeof props.hackathonId === 'string' 
@@ -96,16 +105,16 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="create-team-form">
+  <div class="create-team-form" v-if="!hasExistingTeam">
     <div v-if="checking" class="checking">Проверка...</div>
     <button 
       v-else-if="!showForm && canCreate !== false" 
       @click="showForm = true" 
-      class="btn-create"
+      class="btn-create btn-primary"
     >
       Создать команду
     </button>
-    <div v-else-if="canCreate === false && !showForm && canCreateError && !canCreateError.toLowerCase().includes('you must register')" class="cannot-create">
+    <div v-else-if="canCreate === false && !showForm && canCreateError && !canCreateError.toLowerCase().includes('you must register') && !canCreateError.toLowerCase().includes('already created')" class="cannot-create">
       <p>{{ canCreateError || 'Вы не можете создать команду для этого хакатона' }}</p>
     </div>
     
@@ -141,10 +150,10 @@ onMounted(() => {
         </div>
         
         <div class="form-actions">
-          <button type="submit" :disabled="creating || !teamName.trim()" class="btn-submit">
+          <button type="submit" :disabled="creating || !teamName.trim()" class="btn-submit btn-primary">
             {{ creating ? 'Создание...' : 'Создать команду' }}
           </button>
-          <button type="button" @click="handleCancel" :disabled="creating" class="btn-cancel">
+          <button type="button" @click="handleCancel" :disabled="creating" class="btn-cancel btn-ghost">
             Отмена
           </button>
         </div>
@@ -160,16 +169,6 @@ onMounted(() => {
 
 .btn-create {
   padding: 0.8rem 1.5rem;
-  background: #0987c7;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-.btn-create:hover {
-  background: #0a6fa5;
 }
 
 .form-container {
@@ -246,39 +245,22 @@ onMounted(() => {
 .btn-submit {
   flex: 1;
   padding: 0.8rem;
-  background: #0987c7;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-.btn-submit:hover:not(:disabled) {
-  background: #0a6fa5;
 }
 .btn-submit:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .btn-cancel {
   padding: 0.8rem 1.5rem;
-  background: transparent;
-  color: #b8b8d4;
-  border: 1px solid #3a3a4e;
-  border-radius: 6px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.btn-cancel:hover:not(:disabled) {
-  background: #2a2a3e;
-  border-color: #4a4a5e;
 }
 .btn-cancel:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .checking {

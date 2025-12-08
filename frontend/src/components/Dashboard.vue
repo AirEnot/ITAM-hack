@@ -223,20 +223,6 @@ onMounted(loadDashboard);
   gap: 1rem;
 }
 
-.btn-view {
-  padding: 0.6rem 1.2rem;
-  background: #0987c7;
-  color: #fff;
-  text-decoration: none;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  white-space: nowrap;
-  transition: background 0.2s;
-}
-.btn-view:hover {
-  background: #0a6fa5;
-}
-
 .empty-state {
   text-align: center;
   padding: 3rem;
@@ -249,18 +235,8 @@ onMounted(loadDashboard);
   font-size: 1.1rem;
 }
 
-.btn-primary {
-  display: inline-block;
-  padding: 0.8rem 2rem;
-  background: #0987c7;
-  color: #fff;
-  text-decoration: none;
-  border-radius: 6px;
-  font-size: 1rem;
-  transition: background 0.2s;
-}
-.btn-primary:hover {
-  background: #0a6fa5;
+.btn-view {
+  white-space: nowrap;
 }
 
 @media (min-width: 640px) {

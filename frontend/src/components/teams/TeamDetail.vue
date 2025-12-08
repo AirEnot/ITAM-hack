@@ -142,7 +142,7 @@ onMounted(async () => {
   <div class="team-detail">
     <div v-if="loading">Загрузка...</div>
     <div v-else-if="error" class="error">{{ error }}</div>
-    <div v-else-if="team" class="detail-card">
+    <div v-else-if="team" class="detail-card glass-panel floating">
       <h1>{{ team.name }}</h1>
       <p v-if="team.description" class="description">{{ team.description }}</p>
       <div class="info">
@@ -154,14 +154,14 @@ onMounted(async () => {
       <div v-if="team.members && team.members.length > 0" class="members">
         <h3>Участники:</h3>
         <div class="members-list">
-          <div v-for="member in team.members" :key="member.id" class="member-item">
+          <div v-for="member in team.members" :key="member.id" class="member-item glass-panel">
             <div class="member-header">
               <strong>{{ member.full_name }}</strong>
               <div v-if="isCaptain && member.id !== team.captain_id" class="member-actions">
-                <button @click="removeMember(member.id)" class="btn-remove">Исключить</button>
+                <button @click="removeMember(member.id)" class="btn-remove btn-ghost">Исключить</button>
               </div>
               <div v-else-if="isMember && !isCaptain && member.id === currentUser?.id" class="member-actions">
-                <button @click="leaveTeam" class="btn-leave">Выйти</button>
+                <button @click="leaveTeam" class="btn-leave btn-ghost">Выйти</button>
               </div>
             </div>
             <span v-if="member.role_preference" class="role">{{ member.role_preference }}</span>
@@ -174,7 +174,7 @@ onMounted(async () => {
       
       <!-- Кнопка подачи заявки - для не капитана и не участника -->
       <div v-if="!isCaptain && !isMember && team && team.status === 'open' && !isTeamFull" class="apply-section">
-        <button @click="applyToTeam" :disabled="applying" class="btn-apply">
+        <button @click="applyToTeam" :disabled="applying" class="btn-apply btn-primary">
           {{ applying ? 'Отправка...' : 'Подать заявку в команду' }}
         </button>
         <p v-if="applyError" class="apply-error">{{ applyError }}</p>
@@ -182,12 +182,12 @@ onMounted(async () => {
       </div>
       
       <!-- Сообщение если команда полная -->
-      <div v-if="!isCaptain && !isMember && team && team.status === 'open' && isTeamFull" class="team-full-message">
+      <div v-if="!isCaptain && !isMember && team && team.status === 'open' && isTeamFull" class="team-full-message glass-panel">
         <p>Команда заполнена ({{ team.members?.length || 0 }} / {{ team.max_team_size }})</p>
       </div>
       
       <!-- Сообщение для участника -->
-      <div v-if="isMember && !isCaptain" class="member-status">
+      <div v-if="isMember && !isCaptain" class="member-status glass-panel">
         <p class="member-message">✅ Вы являетесь участником этой команды</p>
       </div>
       
@@ -207,22 +207,23 @@ onMounted(async () => {
   max-width: 800px;
   width: 100%;
   margin: 0 auto;
+  position: relative;
+  overflow: visible;
 }
 
 .detail-card {
-  background: #1e1e2e;
-  border-radius: 12px;
-  padding: 1.5rem;
-  color: #ececec;
+  padding: 1.6rem;
+  color: var(--text);
+  position: relative;
 }
 .detail-card h1 {
-  color: #4cc5fc;
+  color: #f8faff;
   margin-bottom: 1rem;
-  font-size: 1.5rem;
+  font-size: 1.6rem;
 }
 
 .description {
-  color: #b8b8d4;
+  color: var(--muted);
   margin-bottom: 1.5rem;
 }
 
@@ -235,17 +236,19 @@ onMounted(async () => {
 
 .status {
   padding: 0.3rem 0.8rem;
-  border-radius: 6px;
+  border-radius: 999px;
   text-transform: uppercase;
   font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
 .status.open {
-  background: #2a3e2a;
-  color: #7fcf7f;
+  background: linear-gradient(135deg, rgba(124, 99, 255, 0.28), rgba(125, 226, 255, 0.22));
+  color: #e3fff4;
 }
 
 .members h3 {
-  color: #4cc5fc;
+  color: #f8faff;
   margin-bottom: 1rem;
 }
 .members-list {
@@ -254,9 +257,10 @@ onMounted(async () => {
   gap: 1rem;
 }
 .member-item {
-  background: #2a2a3e;
   padding: 1rem;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(140deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
 }
 
 .member-header {
@@ -273,35 +277,14 @@ onMounted(async () => {
 
 .btn-remove,
 .btn-leave {
-  padding: 0.4rem 0.8rem;
-  border: none;
-  border-radius: 4px;
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.btn-remove {
-  background: #cf7f7f;
-  color: #fff;
-}
-
-.btn-remove:hover {
-  background: #b86b6b;
-}
-
-.btn-leave {
-  background: #7f7fcf;
-  color: #fff;
-}
-
-.btn-leave:hover {
-  background: #6b6bb8;
+  padding: 0.55rem 1rem;
+  border-radius: 10px;
+  font-size: 0.9rem;
 }
 
 .member-item .role {
   display: block;
-  color: #b8b8d4;
+  color: var(--muted);
   font-size: 0.9rem;
   margin-top: 0.3rem;
 }
@@ -314,11 +297,11 @@ onMounted(async () => {
 }
 
 .skill-tag {
-  background: #1a1a2e;
+  background: rgba(255, 255, 255, 0.06);
   padding: 0.3rem 0.6rem;
   border-radius: 4px;
   font-size: 0.85rem;
-  color: #4cc5fc;
+  color: #9ae7ff;
 }
 
 .error {
@@ -330,30 +313,22 @@ onMounted(async () => {
 .apply-section {
   margin-top: 2rem;
   padding: 1.5rem;
-  background: #2a2a3e;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: var(--shadow-soft);
 }
 
 .btn-apply {
   width: 100%;
-  padding: 0.8rem;
-  background: #4cc5fc;
-  color: #08131a;
-  border: none;
-  border-radius: 6px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.btn-apply:hover:enabled {
-  background: #3bb0eb;
+  padding: 0.9rem;
 }
 
 .btn-apply:disabled {
-  background: #555;
   cursor: not-allowed;
+  opacity: 0.6;
+  transform: none;
+  box-shadow: none;
 }
 
 .apply-error {
@@ -371,13 +346,14 @@ onMounted(async () => {
 .member-status {
   margin-top: 2rem;
   padding: 1rem;
-  background: #2a3e2a;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
+  background: rgba(83, 243, 197, 0.08);
+  border: 1px solid rgba(83, 243, 197, 0.18);
   text-align: center;
 }
 
 .member-message {
-  color: #7fcf7f;
+  color: #c7fff0;
   margin: 0;
   font-weight: 600;
 }
@@ -385,13 +361,14 @@ onMounted(async () => {
 .team-full-message {
   margin-top: 2rem;
   padding: 1rem;
-  background: #3e2a2a;
-  border-radius: 8px;
+  background: rgba(255, 125, 226, 0.06);
+  border: 1px solid rgba(255, 125, 226, 0.18);
+  border-radius: var(--radius-lg);
   text-align: center;
 }
 
 .team-full-message p {
-  color: #cf7f7f;
+  color: #ffd6f3;
   margin: 0;
   font-weight: 600;
 }

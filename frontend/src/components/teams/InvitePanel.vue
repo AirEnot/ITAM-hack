@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, onUnmounted, watch } from 'vue';
 import apiClient from '../../utils/api';
 
 const props = defineProps<{
@@ -25,6 +25,10 @@ const skillFilter = ref('');
 const availableRoles = ['frontend', 'backend', 'fullstack', 'designer', 'product manager'];
 const availableLevels = ['junior', 'middle', 'senior'];
 const availableSkills = ref<string[]>([]);
+
+// Состояния для кастомных dropdown
+const roleDropdownOpen = ref(false);
+const experienceDropdownOpen = ref(false);
 
 async function loadParticipants() {
   loading.value = true;
@@ -76,7 +80,37 @@ function clearFilters() {
   roleFilter.value = '';
   experienceFilter.value = '';
   skillFilter.value = '';
+  roleDropdownOpen.value = false;
+  experienceDropdownOpen.value = false;
 }
+
+function selectRole(role: string) {
+  roleFilter.value = role;
+  roleDropdownOpen.value = false;
+}
+
+function selectExperience(level: string) {
+  experienceFilter.value = level;
+  experienceDropdownOpen.value = false;
+}
+
+// Закрываем dropdown при клике вне его
+function handleClickOutside(event: MouseEvent) {
+  const target = event.target as HTMLElement;
+  if (!target.closest('.dropdown-wrapper')) {
+    roleDropdownOpen.value = false;
+    experienceDropdownOpen.value = false;
+  }
+}
+
+onMounted(() => {
+  loadParticipants();
+  document.addEventListener('click', handleClickOutside);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside);
+});
 
 async function inviteUser(userId: number) {
   if (!confirm('Отправить приглашение этому пользователю?')) return;
@@ -97,7 +131,6 @@ async function inviteUser(userId: number) {
   }
 }
 
-onMounted(loadParticipants);
 </script>
 
 <template>
@@ -114,17 +147,49 @@ onMounted(loadParticipants);
           class="filter-input"
         />
       </div>
-      <div class="filter-group">
-        <select v-model="roleFilter" class="filter-select">
-          <option value="">Все роли</option>
-          <option v-for="role in availableRoles" :key="role" :value="role">{{ role }}</option>
-        </select>
+      <div class="filter-group dropdown-wrapper">
+        <div class="custom-dropdown" @click.stop="roleDropdownOpen = !roleDropdownOpen">
+          <span class="dropdown-value">{{ roleFilter || 'Все роли' }}</span>
+          <svg class="dropdown-arrow" :class="{ open: roleDropdownOpen }" width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <path d="M6 9L1 4h10L6 9z" fill="currentColor"/>
+          </svg>
+        </div>
+        <div v-if="roleDropdownOpen" class="dropdown-menu">
+          <div class="dropdown-option" :class="{ active: !roleFilter }" @click="selectRole('')">
+            Все роли
+          </div>
+          <div 
+            v-for="role in availableRoles" 
+            :key="role" 
+            class="dropdown-option" 
+            :class="{ active: roleFilter === role }"
+            @click="selectRole(role)"
+          >
+            {{ role }}
+          </div>
+        </div>
       </div>
-      <div class="filter-group">
-        <select v-model="experienceFilter" class="filter-select">
-          <option value="">Все уровни</option>
-          <option v-for="level in availableLevels" :key="level" :value="level">{{ level }}</option>
-        </select>
+      <div class="filter-group dropdown-wrapper">
+        <div class="custom-dropdown" @click.stop="experienceDropdownOpen = !experienceDropdownOpen">
+          <span class="dropdown-value">{{ experienceFilter || 'Все уровни' }}</span>
+          <svg class="dropdown-arrow" :class="{ open: experienceDropdownOpen }" width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <path d="M6 9L1 4h10L6 9z" fill="currentColor"/>
+          </svg>
+        </div>
+        <div v-if="experienceDropdownOpen" class="dropdown-menu">
+          <div class="dropdown-option" :class="{ active: !experienceFilter }" @click="selectExperience('')">
+            Все уровни
+          </div>
+          <div 
+            v-for="level in availableLevels" 
+            :key="level" 
+            class="dropdown-option" 
+            :class="{ active: experienceFilter === level }"
+            @click="selectExperience(level)"
+          >
+            {{ level }}
+          </div>
+        </div>
       </div>
       <!-- <div class="filter-group">
         <select v-model="skillFilter" class="filter-select">
@@ -132,7 +197,7 @@ onMounted(loadParticipants);
           <option v-for="skill in availableSkills" :key="skill" :value="skill">{{ skill }}</option>
         </select>
       </div> -->
-      <button @click="clearFilters" class="btn-clear-filters">Очистить</button>
+      <button @click="clearFilters" class="btn-clear-filters btn-ghost">Очистить</button>
     </div>
     
     <div v-if="loading">Загрузка...</div>
@@ -150,7 +215,7 @@ onMounted(loadParticipants);
         <button
           @click="inviteUser(participant.id)"
           :disabled="inviting === participant.id"
-          class="btn-invite"
+          class="btn-invite btn-primary"
         >
           {{ inviting === participant.id ? 'Отправка...' : 'Пригласить' }}
         </button>
@@ -161,14 +226,21 @@ onMounted(loadParticipants);
 
 <style scoped lang="css">
 .invite-panel {
-  background: #1e1e2e;
-  border-radius: 12px;
-  padding: 1.5rem;
   margin-top: 2rem;
+  padding: 1.6rem;
+  border-radius: var(--radius-lg);
+  background: var(--glass);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(var(--blur-soft));
+  -webkit-backdrop-filter: blur(var(--blur-soft));
+  position: relative;
+  overflow: visible;
 }
 .invite-panel h3 {
-  color: #4cc5fc;
-  margin-bottom: 1rem;
+  color: #f8faff;
+  margin-bottom: 1.2rem;
+  font-size: 1.2rem;
 }
 
 .filters {
@@ -176,45 +248,190 @@ onMounted(loadParticipants);
   flex-direction: column;
   gap: 0.8rem;
   margin-bottom: 1.5rem;
-  padding: 1rem;
-  background: #2a2a3e;
-  border-radius: 8px;
+  padding: 1.2rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  overflow: visible;
+  position: relative;
 }
 
 .filter-group {
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
-.filter-input,
-.filter-select {
+@media (min-width: 640px) {
+  .filter-group {
+    min-width: 140px;
+  }
+  
+  .filter-group:first-child {
+    min-width: 0;
+  }
+}
+
+.filter-input {
   width: 100%;
-  padding: 0.6rem;
-  border-radius: 6px;
-  border: 1px solid #444;
-  background: #1a1a2e;
-  color: #fff;
-  font-size: 0.9rem;
+  padding: 0.75rem 1rem;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  color: var(--text);
+  font-size: 0.95rem;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.filter-input:focus,
-.filter-select:focus {
+.filter-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.filter-input:focus {
   outline: none;
-  border-color: #4cc5fc;
+  border-color: rgba(125, 226, 255, 0.5);
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 6px 20px rgba(125, 226, 255, 0.2), 0 0 0 3px rgba(125, 226, 255, 0.1);
+}
+
+.dropdown-wrapper {
+  position: relative;
+  z-index: 10;
+}
+
+.custom-dropdown {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  padding-right: 2.5rem;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  color: var(--text);
+  font-size: 0.95rem;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+}
+
+.custom-dropdown:hover {
+  border-color: rgba(125, 226, 255, 0.4);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dropdown-value {
+  flex: 1;
+  color: var(--text);
+}
+
+.dropdown-arrow {
+  position: absolute;
+  right: 0.75rem;
+  color: rgba(255, 255, 255, 0.7);
+  transition: transform 0.2s ease;
+  pointer-events: none;
+}
+
+.dropdown-arrow.open {
+  transform: rotate(180deg);
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: rgba(5, 6, 12, 0.85);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 14px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  max-height: 120px !important;
+  animation: dropdownFadeIn 0.2s ease;
+  min-width: 100%;
+  /* Для Firefox */
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(125, 226, 255, 0.6) rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Стилизация скроллбара для dropdown (WebKit) */
+.dropdown-menu::-webkit-scrollbar {
+  width: 8px !important;
+  display: block !important;
+}
+
+.dropdown-menu::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-radius: 10px !important;
+  margin: 4px 0 !important;
+}
+
+.dropdown-menu::-webkit-scrollbar-thumb {
+  background: rgba(125, 226, 255, 0.6) !important;
+  border-radius: 10px !important;
+  transition: background 0.2s ease !important;
+  border: 1px solid rgba(125, 226, 255, 0.2) !important;
+}
+
+.dropdown-menu::-webkit-scrollbar-thumb:hover {
+  background: rgba(125, 226, 255, 0.8) !important;
+  border-color: rgba(125, 226, 255, 0.4) !important;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdown-option {
+  padding: 0.75rem 1rem;
+  color: var(--text);
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.dropdown-option:last-child {
+  border-bottom: none;
+}
+
+.dropdown-option:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #7de2ff;
+}
+
+.dropdown-option.active {
+  background: linear-gradient(135deg, rgba(125, 226, 255, 0.2), rgba(124, 99, 255, 0.15));
+  color: #7de2ff;
+  font-weight: 600;
 }
 
 .btn-clear-filters {
-  padding: 0.6rem 1rem;
-  background: #555;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
+  padding: 0.75rem 1.2rem;
+  border-radius: 12px;
   font-size: 0.9rem;
-}
-
-.btn-clear-filters:hover {
-  background: #666;
+  white-space: nowrap;
 }
 
 @media (min-width: 640px) {
@@ -241,18 +458,26 @@ onMounted(loadParticipants);
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  background: #2a2a3e;
+  background: linear-gradient(140deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
   padding: 1rem;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(var(--blur-soft));
+  -webkit-backdrop-filter: blur(var(--blur-soft));
 }
 
 .participant-info {
   flex: 1;
   width: 100%;
 }
+.participant-info strong {
+  color: var(--text);
+  display: block;
+  margin-bottom: 0.3rem;
+}
 .participant-info .role {
   display: block;
-  color: #b8b8d4;
+  color: var(--muted);
   font-size: 0.9rem;
   margin-top: 0.3rem;
 }
@@ -265,25 +490,25 @@ onMounted(loadParticipants);
 }
 
 .skill-tag {
-  background: #1a1a2e;
+  background: rgba(255, 255, 255, 0.06);
   padding: 0.3rem 0.6rem;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 0.85rem;
-  color: #4cc5fc;
+  color: #9ae7ff;
+  border: 1px solid rgba(154, 231, 255, 0.2);
 }
 
 .btn-invite {
   width: 100%;
-  padding: 0.6rem 1.2rem;
-  background: #0987c7;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
+  padding: 0.7rem 1.2rem;
+  border-radius: 12px;
+  font-size: 0.95rem;
 }
 .btn-invite:disabled {
-  background: #555;
+  opacity: 0.6;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .error {

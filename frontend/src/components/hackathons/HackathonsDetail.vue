@@ -93,10 +93,10 @@ onMounted(loadHackathon);
           <strong>Максимальный размер команды:</strong> {{ hackathon.max_team_size }}
         </div>
       </div>
-      <div v-if="isRegistered && hackathon.status === 'upcoming'" class="registration-status">
+      <div v-if="isRegistered && hackathon.status === 'upcoming'" class="registration-status glass-panel">
         <p class="registered-message">✅ Вы зарегистрированы на этот хакатон</p>
       </div>
-      <button v-else-if="hackathon.status === 'upcoming'" @click="register" :disabled="registering" class="btn-register">
+      <button v-else-if="hackathon.status === 'upcoming'" @click="register" :disabled="registering" class="btn-register btn-primary">
         {{ registering ? 'Регистрация...' : 'Зарегистрироваться' }}
       </button>
       <div v-if="hackathon" class="teams-section">
@@ -146,52 +146,50 @@ onMounted(loadHackathon);
 .info-item {
   color: #ececec;
 }
-.status {
-  padding: 0.3rem 0.8rem;
-  border-radius: 6px;
-  text-transform: uppercase;
-  font-size: 0.75rem;
-}
-.status.upcoming {
-  background: #2a3e2a;
-  color: #7fcf7f;
-}
-.status.active {
-  background: #3e2a2a;
-  color: #cf7f7f;
-}
-.status.finished {
-  background: #2a2a3e;
-  color: #7f7fcf;
-}
+/* Стили статусов теперь в глобальном style.css */
 
 .btn-register {
   width: 100%;
-  padding: 0.8rem;
-  background: #0987c7;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  font-size: 1rem;
-  cursor: pointer;
 }
 .btn-register:disabled {
-  background: #555;
+  opacity: 0.6;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .registration-status {
   margin-bottom: 2rem;
-  padding: 1rem;
-  background: #2a3e2a;
-  border-radius: 8px;
+  padding: 1.2rem 1.5rem;
   text-align: center;
+  background: rgba(46, 196, 182, 0.15);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(92, 255, 230, 0.3);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 24px rgba(46, 196, 182, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+  position: relative;
+  overflow: hidden;
+}
+
+.registration-status::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, rgba(92, 255, 230, 0.1), rgba(46, 196, 182, 0.05));
+  opacity: 0.6;
+  pointer-events: none;
+  z-index: 0;
 }
 
 .registered-message {
-  color: #7fcf7f;
+  color: #5cf3c5;
   margin: 0;
   font-weight: 600;
+  font-size: 1rem;
+  position: relative;
+  z-index: 1;
+  text-shadow: 0 0 10px rgba(92, 255, 230, 0.3);
 }
 
 .error {

@@ -140,24 +140,7 @@ onMounted(loadHackathons);
   white-space: nowrap;
 }
 
-.status {
-  padding: 0.3rem 0.8rem;
-  border-radius: 6px;
-  text-transform: uppercase;
-  font-size: 0.75rem;
-}
-.status.upcoming {
-  background: #2a3e2a;
-  color: #7fcf7f;
-}
-.status.active {
-  background: #3e2a2a;
-  color: #cf7f7f;
-}
-.status.finished {
-  background: #2a2a3e;
-  color: #7f7fcf;
-}
+/* Стили статусов теперь в глобальном style.css */
 
 .btn-edit {
   padding: 0.5rem 1rem;

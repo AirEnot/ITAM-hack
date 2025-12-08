@@ -61,7 +61,7 @@ onMounted(loadProfile);
         </div>
       </div>
       <div class="profile-actions">
-        <router-link to="/profile/edit" class="btn-edit">Редактировать профиль</router-link>
+        <router-link to="/profile/edit" class="btn-edit btn-primary">Редактировать профиль</router-link>
         <button @click="handleLogout" class="btn-logout">Выйти из аккаунта</button>
       </div>
     </div>
@@ -148,26 +148,57 @@ onMounted(loadProfile);
 }
 .btn-edit,
 .btn-logout {
-  padding: 0.7rem 1.2rem;
-  border-radius: 8px;
-  font-size: 0.96rem;
-  text-decoration: none;
+  width: 100%;
   text-align: center;
-  cursor: pointer;
-  border: none;
-  transition: all 0.15s;
-  font-weight: 600;
+  font-size: 1rem;
+  font-weight: 700;
 }
-.btn-edit {
-  background: #4cc5fc;
-  color: #08131a;
-}
-.btn-edit:hover { opacity: 0.92; }
+
 .btn-logout {
-  background: #ff6b6b;
-  color: #fff;
+  background: linear-gradient(135deg, #ff6b6b 0%, #ff4757 50%, #ee5a6f 100%);
+  color: #000;
+  box-shadow: 0 10px 30px rgba(255, 71, 87, 0.3), 0 8px 18px rgba(0, 0, 0, 0.3);
+  border: none;
+  cursor: pointer;
+  border-radius: 14px;
+  padding: 0.9rem 1.25rem;
+  transition: transform 0.2s ease, box-shadow 0.25s ease, background 0.2s ease;
+  position: relative;
+  isolation: isolate;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+  letter-spacing: 0.01em;
+  line-height: 1.15;
 }
-.btn-logout:hover { opacity: 0.92; }
+
+.btn-logout::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.22), transparent 45%);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.btn-logout:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 35px rgba(255, 71, 87, 0.4), 0 10px 22px rgba(0, 0, 0, 0.35);
+}
+
+.btn-logout:hover::after {
+  opacity: 1;
+}
+
+.btn-logout:active {
+  transform: translateY(0);
+  box-shadow: 0 6px 20px rgba(255, 71, 87, 0.25), 0 4px 12px rgba(0, 0, 0, 0.25);
+}
 
 .error {
   color: #ff6b6b;

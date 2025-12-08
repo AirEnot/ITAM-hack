@@ -66,17 +66,7 @@ const props = defineProps<{
 }
 
 .btn-view {
-  display: block;
   text-align: center;
-  padding: 0.7rem;
-  background: #0987c7;
-  color: #fff;
-  text-decoration: none;
-  border-radius: 6px;
-  transition: background 0.15s;
-}
-.btn-view:hover {
-  background: #0a9de0;
 }
 
 .capacity-info {

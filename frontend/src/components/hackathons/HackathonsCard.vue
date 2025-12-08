@@ -12,7 +12,7 @@ function formatDate(dateStr: string): string {
 </script>
 
 <template>
-  <div class="hackathon-card">
+  <div class="hackathon-card glass-panel">
     <h3>{{ props.hackathon.name }}</h3>
     <div class="dates">
       <div>📅 Начало: {{ formatDate(props.hackathon.start_date) }}</div>
@@ -28,22 +28,25 @@ function formatDate(dateStr: string): string {
 
 <style scoped lang="css">
 .hackathon-card {
-  background: #1e1e2e;
-  border-radius: 12px;
-  padding: 1.2rem;
-  color: #ececec;
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+  border-radius: var(--radius-lg);
+  padding: 1.3rem;
+  color: var(--text);
   display: flex;
   flex-direction: column;
   gap: 0.8rem;
-  transition: transform 0.2s;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border 0.25s ease;
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 .hackathon-card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-strong);
+  border-color: rgba(125, 226, 255, 0.35);
 }
 .hackathon-card h3 {
   margin: 0;
-  color: #4cc5fc;
-  font-size: 1.1rem;
+  color: #f8faff;
+  font-size: 1.2rem;
   line-height: 1.3;
 }
 
@@ -57,8 +60,8 @@ function formatDate(dateStr: string): string {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  font-size: 0.9rem;
-  color: #aaa;
+  font-size: 0.95rem;
+  color: var(--muted);
 }
 
 .meta {
@@ -68,37 +71,26 @@ function formatDate(dateStr: string): string {
   font-size: 0.85rem;
 }
 
-.status {
-  padding: 0.3rem 0.8rem;
-  border-radius: 6px;
-  text-transform: uppercase;
-  font-size: 0.75rem;
-}
-.status.upcoming {
-  background: #2a3e2a;
-  color: #7fcf7f;
-}
-.status.active {
-  background: #3e2a2a;
-  color: #cf7f7f;
-}
-.status.finished {
-  background: #2a2a3e;
-  color: #7f7fcf;
-}
+/* Стили статусов теперь в глобальном style.css */
 
 .btn-view {
   display: block;
   text-align: center;
   padding: 0.7rem;
-  background: #0987c7;
-  color: #fff;
+  background: linear-gradient(135deg, #7de2ff 0%, #7c63ff 70%);
+  color: #04101a;
   text-decoration: none;
-  border-radius: 6px;
-  transition: background 0.15s;
+  border-radius: 12px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  font-weight: 700;
+  box-shadow: 0 12px 32px rgba(124, 99, 255, 0.25);
+  position: relative;
+  z-index: 1;
 }
 .btn-view:hover {
-  background: #0a9de0;
+  background: linear-gradient(135deg, #8de8ff 0%, #8b79ff 70%);
+  transform: translateY(-2px);
+  box-shadow: 0 16px 40px rgba(124, 99, 255, 0.32);
 }
 
 @media (min-width: 640px) {
